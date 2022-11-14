@@ -69,6 +69,121 @@ int fputc(int c, FILE *f) {
 }
 
 static __IO uint32_t uwTick;
+
+void switch_speeds(double speed) {
+	int count = 524288; //для всех режимов кроме 004 сек
+	int delay_1sec = 149;
+	int delay_05sec = 60;
+	int delay_025sec = 15;
+	int delay_004sec = 0;
+	uint32_t i, d; // d-для задержки
+	int delay = delay_1sec;
+	if (speed == 1) {
+		delay = delay_1sec;
+	}
+	else if (speed == 0.5) {
+		delay = delay_05sec;
+	}
+	else if (speed == 0.25) {
+		delay = delay_025sec;
+	}
+	else if (speed == 0.04) {
+		delay = delay_004sec;
+		count = 126976; //для 004 сек режим
+	}
+	else {
+		count = 524288;
+		delay = delay_1sec;
+	}
+	
+	for(i=0;i<=count/16*14;i++)
+		{
+			if(i<count/16) 
+			{
+				TIM1->CCR1 = i;
+				TIM1->CCER |= TIM_CCER_CC1NE;
+				TIM1->CCER &= ~TIM_CCER_CC1E;
+			}
+			else if((i>count/16   - 1)&&(i<count/16*2)) 
+			{
+				TIM1->CCR1 = count/16*2-i;
+				TIM1->CCER |= TIM_CCER_CC1NE;
+				TIM1->CCER &= ~TIM_CCER_CC1E;
+			}					
+			else if((i>count/16*2 - 1)&&(i<count/16*3))
+			{
+				TIM1->CCR1 = i-count/16*2;
+				TIM1->CCER |= TIM_CCER_CC1E;
+				TIM1->CCER &= ~TIM_CCER_CC1NE;
+			}
+			else if((i>count/16*3 - 1)&&(i<count/16*4))
+			{ 
+				TIM1->CCR1 = count/16*4-i;
+				TIM1->CCER |= TIM_CCER_CC1E;
+				TIM1->CCER &= ~TIM_CCER_CC1NE;
+			}
+			else if((i>count/16*4 - 1)&&(i<count/16*5))
+			{
+				TIM1->CCR2 = i-count/16*4;
+				TIM1->CCER |= TIM_CCER_CC2NE;
+				TIM1->CCER &= ~TIM_CCER_CC2E;
+			}
+			else if((i>count/16*5 - 1)&&(i<count/16*6))
+			{
+				TIM1->CCR2 = count/16*6-i;
+				TIM1->CCER |= TIM_CCER_CC2NE;
+				TIM1->CCER &= ~TIM_CCER_CC2E;
+			}
+			else if((i>count/16*6 - 1)&&(i<count/16*7))
+			{
+				TIM1->CCR2 = i-count/16*6;
+				TIM1->CCER |= TIM_CCER_CC2E;
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+			}
+			else if((i>count/16*7 - 1)&&(i<count/16*8))
+			{
+				TIM1->CCR2 = count/16*8-i;
+				TIM1->CCER |= TIM_CCER_CC2E;
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+			}
+			else if((i>count/16*8 - 1)&&(i<count/16*9))
+			{
+				TIM1->CCR3 = i-count/16*8;
+				TIM1->CCER |= TIM_CCER_CC3NE;
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+			}
+			else if((i>count/16*9 - 1)&&(i<count/16*10))
+			{
+				TIM1->CCR3 = count/16*10-i;
+				TIM1->CCER |= TIM_CCER_CC3NE;
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+			}
+			else if((i>count/16*10 - 1)&&(i<count/16*11))
+			{
+				TIM1->CCR3 = i-count/16*10;
+				TIM1->CCER |= TIM_CCER_CC3E;
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+			}
+			else if((i>count/16*11 - 1)&&(i<count/16*12))
+			{
+				TIM1->CCR3 = count/16*12-i;
+				TIM1->CCER |= TIM_CCER_CC3E;
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+			}
+			else if((i>count/16*12 - 1)&&(i<count/16*13))
+			{	
+				TIM1->CCR4 = i-count/16*12;
+			}
+			else if((i>count/16*13 - 1)&&(i<count/16*14))
+			{
+				TIM1->CCR4 = count/16*14-i;
+			}
+			//задержка
+			for(d=0;d<delay;d++)
+			{
+			}
+		}
+}
 /* USER CODE END 0 */
 
 /**
@@ -78,7 +193,7 @@ static __IO uint32_t uwTick;
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint32_t i, d; // d-для задержки
+	//uint32_t i, d; // d-для задержки
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -130,12 +245,19 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		//int count = 131072;
+		switch_speeds(0.04);
+		printf("time = %i\n", HAL_GetTick()*2);
+		/*
+		int count = 126976; //для 004 сек режим
 		//int count = 262144;
-		int count = 524288; //delta 34952
+		//int count = 524288; //delta 34952
 		//int count = 489336;
-		//int count = 559240;
-		//clock_t time_before = clock();
+		//int count = 559240; //для всех режимов кроме 004 сек
+		int delay_1sec = 149;
+		int delay_05sec = 60;
+		int delay_025sec = 15;
+		int delay_004sec = 0;
+		
 		for(i=0;i<=count/16*14;i++)
 		{
 			if(i<count/16) 
@@ -219,16 +341,11 @@ int main(void)
 				TIM1->CCR4 = count/16*14-i;
 			}
 			//задержка
-			for(d=0;d<106;d++)
+			for(d=0;d<delay_004sec;d++)
 			{
 			}
-		}
-		printf("time = %i\n", HAL_GetTick()*2);
-		/*
-		clock_t time_after = clock();
-		double time = (double) (time_after - time_before) / (double)CLOCKS_PER_SEC;
-		printf("time = %f\n", time);
-		*/
+		}*/
+		//printf("time = %i\n", HAL_GetTick()*2);
   }
   /* USER CODE END 3 */
 }
