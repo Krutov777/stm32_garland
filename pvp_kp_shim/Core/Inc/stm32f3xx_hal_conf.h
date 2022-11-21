@@ -151,7 +151,7 @@
   */
 
 #define  VDD_VALUE                   ((uint32_t)3300) /*!< Value of VDD in mv */
-#define  TICK_INT_PRIORITY            ((uint32_t)1)    /*!< tick interrupt priority (lowest by default)  */ // !!!!!Áûכמ 15
+#define  TICK_INT_PRIORITY            ((uint32_t)15)    /*!< tick interrupt priority (lowest by default)  */
 #define  USE_RTOS                     0
 #define  PREFETCH_ENABLE              1
 #define  INSTRUCTION_CACHE_ENABLE     0
