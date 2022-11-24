@@ -43,7 +43,29 @@
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
-
+uint8_t flag_key1_press = 1;
+uint32_t time_key1_press = 0;
+uint32_t count = 65536;
+uint32_t count_one_led = 65536; //для всех режимов кроме 004 сек(для одного светодиода)
+uint32_t count_one_led004sec = 65536;
+uint32_t count_two_leds = 65536; //для всех режимов кроме 004 сек(для одного светодиода)
+uint32_t count_two_led004sec = 65536;
+// count = 32768; для двух светодиодов старый
+uint32_t delay = 717;//с учетом оптизимацией O1
+uint32_t i;
+volatile uint32_t d; //
+uint32_t delay_1sec_one_led = 717;
+uint32_t delay_05sec_one_led = 351;
+uint32_t delay_025sec_one_led = 168;
+uint32_t delay_004sec_one_led = 14;//4мс погрешность
+uint32_t delay_1sec_two_leds = 149;
+uint32_t delay_05sec_two_leds = 60;
+uint32_t delay_025sec_two_leds = 15;
+uint32_t delay_004sec_two_leds = 0;
+_Bool direction_mode = 0;
+uint8_t number_leds_mode = 1;
+uint8_t switch_speeds_mode = 1;
+_Bool restart = 0;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -53,6 +75,12 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM3_Init(void);
+void switch_speeds_one_led(uint16_t speed_mode);
+void switch_speeds_two_led(uint16_t speed_mode);
+void Clockwise_One(void);
+void Counterclockwise_One(void);
+void Clockwise_Two(void);
+void Counterclockwise_Two(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -69,122 +97,6 @@ int fputc(int c, FILE *f) {
   return (SER_PutChar(c));
 }
 
-static __IO uint32_t uwTick;
-
-void switch_speeds(double speed) {
-	int count = 524288; //для всех режимов кроме 004 сек
-	int delay_1sec = 149;
-	int delay_05sec = 60;
-	int delay_025sec = 15;
-	int delay_004sec = 0;
-	uint32_t i, d; // d-для задержки
-	int delay = delay_1sec;
-	if (speed == 1) {
-		delay = delay_1sec;
-	}
-	else if (speed == 0.5) {
-		delay = delay_05sec;
-	}
-	else if (speed == 0.25) {
-		delay = delay_025sec;
-	}
-	else if (speed == 0.04) {
-		delay = delay_004sec;
-		count = 126976; //для 004 сек режим
-	}
-	else {
-		count = 524288;
-		delay = delay_1sec;
-	}
-	
-	for(i=0;i<=count/16*14;i++)
-		{
-			if(i<count/16) 
-			{
-				TIM1->CCR1 = i;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-			}
-			else if((i>count/16   - 1)&&(i<count/16*2)) 
-			{
-				TIM1->CCR1 = count/16*2-i;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-			}					
-			else if((i>count/16*2 - 1)&&(i<count/16*3))
-			{
-				TIM1->CCR1 = i-count/16*2;
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
-			}
-			else if((i>count/16*3 - 1)&&(i<count/16*4))
-			{ 
-				TIM1->CCR1 = count/16*4-i;
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
-			}
-			else if((i>count/16*4 - 1)&&(i<count/16*5))
-			{
-				TIM1->CCR2 = i-count/16*4;
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-			}
-			else if((i>count/16*5 - 1)&&(i<count/16*6))
-			{
-				TIM1->CCR2 = count/16*6-i;
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-			}
-			else if((i>count/16*6 - 1)&&(i<count/16*7))
-			{
-				TIM1->CCR2 = i-count/16*6;
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count/16*7 - 1)&&(i<count/16*8))
-			{
-				TIM1->CCR2 = count/16*8-i;
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count/16*8 - 1)&&(i<count/16*9))
-			{
-				TIM1->CCR3 = i-count/16*8;
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count/16*9 - 1)&&(i<count/16*10))
-			{
-				TIM1->CCR3 = count/16*10-i;
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count/16*10 - 1)&&(i<count/16*11))
-			{
-				TIM1->CCR3 = i-count/16*10;
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count/16*11 - 1)&&(i<count/16*12))
-			{
-				TIM1->CCR3 = count/16*12-i;
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count/16*12 - 1)&&(i<count/16*13))
-			{	
-				TIM1->CCR4 = i-count/16*12;
-			}
-			else if((i>count/16*13 - 1)&&(i<count/16*14))
-			{
-				TIM1->CCR4 = count/16*14-i;
-			}
-			//задержка
-			for(d=0;d<delay;d++)
-			{
-			}
-		}
-}
 /* USER CODE END 0 */
 
 /**
@@ -233,10 +145,10 @@ int main(void)
 	GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
 	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_BREAK);
-	//HAL_TIM_PWM_Start (&htim1, TIM_IT_BREAK);//запустим ШИМ
 	
 	TIM1->CCER &= ~TIM_CCER_CC2NE;
 	TIM1->CCER &= ~TIM_CCER_CC3NE;
+	
 	
   /* USER CODE END 2 */
   /* Infinite loop */
@@ -245,109 +157,665 @@ int main(void)
   {
     /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
-		switch_speeds(0.04);
-		//printf("time = %i\n", HAL_GetTick()*2);
-		/*
-		int count = 126976; //для 004 сек режим
-		//int count = 262144;
-		//int count = 524288; //delta 34952
-		//int count = 489336;
-		//int count = 559240; //для всех режимов кроме 004 сек
-		int delay_1sec = 149;
-		int delay_05sec = 60;
-		int delay_025sec = 15;
-		int delay_004sec = 0;
-		
-		for(i=0;i<=count/16*14;i++)
-		{
-			if(i<count/16) 
-			{
-				TIM1->CCR1 = i;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
+		if(number_leds_mode == 1) {
+			switch_speeds_one_led(switch_speeds_mode);
+			if(direction_mode == 0) {
+				Clockwise_One();
+				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if((i>count/16   - 1)&&(i<count/16*2)) 
-			{
-				TIM1->CCR1 = count/16*2-i;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-			}					
-			else if((i>count/16*2 - 1)&&(i<count/16*3))
-			{
-				TIM1->CCR1 = i-count/16*2;
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
+			else if(direction_mode == 1) {
+				Counterclockwise_One();
+				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if((i>count/16*3 - 1)&&(i<count/16*4))
-			{ 
-				TIM1->CCR1 = count/16*4-i;
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
+		}
+		else if(number_leds_mode == 2) {
+			switch_speeds_two_led(switch_speeds_mode);
+			if(direction_mode == 0) {
+				Clockwise_Two();
+				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if((i>count/16*4 - 1)&&(i<count/16*5))
-			{
-				TIM1->CCR2 = i-count/16*4;
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
+			else if(direction_mode == 1) {
+				Counterclockwise_Two();
+				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if((i>count/16*5 - 1)&&(i<count/16*6))
-			{
-				TIM1->CCR2 = count/16*6-i;
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-			}
-			else if((i>count/16*6 - 1)&&(i<count/16*7))
-			{
-				TIM1->CCR2 = i-count/16*6;
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count/16*7 - 1)&&(i<count/16*8))
-			{
-				TIM1->CCR2 = count/16*8-i;
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count/16*8 - 1)&&(i<count/16*9))
-			{
-				TIM1->CCR3 = i-count/16*8;
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count/16*9 - 1)&&(i<count/16*10))
-			{
-				TIM1->CCR3 = count/16*10-i;
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count/16*10 - 1)&&(i<count/16*11))
-			{
-				TIM1->CCR3 = i-count/16*10;
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count/16*11 - 1)&&(i<count/16*12))
-			{
-				TIM1->CCR3 = count/16*12-i;
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count/16*12 - 1)&&(i<count/16*13))
-			{	
-				TIM1->CCR4 = i-count/16*12;
-			}
-			else if((i>count/16*13 - 1)&&(i<count/16*14))
-			{
-				TIM1->CCR4 = count/16*14-i;
-			}
-			//задержка
-			for(d=0;d<delay_004sec;d++)
-			{
-			}
-		}*/
-		//printf("time = %i\n", HAL_GetTick()*2);
+		}
   }
   /* USER CODE END 3 */
+}
+
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
+	{
+		flag_key1_press = 1;
+	}
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	{
+		flag_key1_press = 0;
+		// действие на нажатие
+		if(switch_speeds_mode == 1 || switch_speeds_mode == 2 || switch_speeds_mode == 3)
+			++switch_speeds_mode;
+		else
+			switch_speeds_mode = 1;
+		printf("speed = %i\n", switch_speeds_mode);
+		restart = 1;
+		time_key1_press = HAL_GetTick();
+	}
+  /* USER CODE END EXTI0_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line1 interrupt.
+  */
+void EXTI1_IRQHandler(void)
+{
+	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
+	{
+		flag_key1_press = 1;
+	}
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	{
+		flag_key1_press = 0;
+		// действие на нажатие
+		if(direction_mode == 1)
+			direction_mode = 0;
+		else direction_mode = 1;
+		printf("direction = %i\n", direction_mode);	
+		restart = 1;
+		time_key1_press = HAL_GetTick();
+	}
+  /* USER CODE END EXTI1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
+
+  /* USER CODE BEGIN EXTI1_IRQn 1 */
+  /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line2 and Touch Sense controller.
+  */
+void EXTI2_TSC_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_TSC_IRQn 0 */
+	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
+	{
+		flag_key1_press = 1;
+	}
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	{
+		flag_key1_press = 0;
+		// действие на нажатие
+		if(number_leds_mode == 1)
+			++number_leds_mode;
+		else number_leds_mode = 1;
+		printf("number of leds = %i\n", number_leds_mode);
+		restart = 1;
+		time_key1_press = HAL_GetTick();
+	}
+  /* USER CODE END EXTI2_TSC_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
+  /* USER CODE BEGIN EXTI2_TSC_IRQn 1 */
+  /* USER CODE END EXTI2_TSC_IRQn 1 */
+}
+
+
+
+void switch_speeds_one_led(uint16_t speed_mode) {
+	// speed mode =
+	// 1 - 1 с на зажигание и затухание, те 2 с
+	// 2 - 0.5 с, те 1 с
+	// 3 - 0.25 с, те 0.5 с
+	// 4 - 0.04 с, те 0.08 с
+	
+	if (speed_mode == 1) {
+		delay = delay_1sec_one_led;
+		count = count_one_led;
+	}
+	else if (speed_mode == 2) {
+		delay = delay_05sec_one_led;
+		count = count_one_led;
+	}
+	else if (speed_mode == 3) {
+		delay = delay_025sec_one_led;
+		count = count_one_led;
+	}
+	else if (speed_mode == 4) {
+		delay = delay_004sec_one_led;
+		count = count_one_led004sec; //для 004 сек режим
+	}
+	else {
+		count = count_one_led;
+		delay = delay_1sec_one_led;
+	}
+}
+
+void switch_speeds_two_led(uint16_t speed_mode) {
+	// speed mode =
+	// 1 - 1 с на зажигание и затухание, те 2 с
+	// 2 - 0.5 с, те 1 с
+	// 3 - 0.25 с, те 0.5 с
+	// 4 - 0.04 с, те 0.08 с
+	
+	if (speed_mode == 1) {
+		delay = delay_1sec_two_leds;
+		count = count_two_leds;
+	}
+	else if (speed_mode == 2) {
+		delay = delay_05sec_two_leds;
+		count = count_two_leds;
+	}
+	else if (speed_mode == 3) {
+		delay = delay_025sec_two_leds;
+		count = count_two_leds;
+	}
+	else if (speed_mode == 4) {
+		delay = delay_004sec_two_leds;
+		count = count_two_led004sec; //для 004 сек режим
+	}
+	else {
+		count = count_two_leds;
+		delay = delay_1sec_two_leds;
+	}
+}
+
+void Clockwise_One(void)
+{
+	  uint32_t count_16_parts = count/16;
+		TIM1->CCER &= ~TIM_CCER_CC4E;
+		TIM1->CCR4 = 0;
+	
+		TIM1->CCER |= TIM_CCER_CC1NE;
+		TIM1->CCER &= ~TIM_CCER_CC1E;
+		for(i=0;i<=count_16_parts*14;i++)
+		{
+			if (restart){
+				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+				| TIM_CCER_CC2E | TIM_CCER_CC2NE
+				| TIM_CCER_CC3E | TIM_CCER_CC3NE
+				| TIM_CCER_CC4E);
+				TIM1->CCR1 = 0;
+				TIM1->CCR2 = 0;
+				TIM1->CCR3 = 0;
+				TIM1->CCR4 = 0;
+				restart = 0;
+				break;
+			}
+			//volatile int i;
+			if(i<count_16_parts) 
+			{
+				TIM1->CCR1 = 65535 * i / (count_16_parts);
+			}
+			else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+			{
+				TIM1->CCR1 = 65535 * (count_16_parts*2-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*2) 
+			{
+				TIM1->CCER |= TIM_CCER_CC1E;
+				TIM1->CCER &= ~TIM_CCER_CC1NE;
+			}
+			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+			{
+				TIM1->CCR1 = 65535 * (i-count_16_parts*2) / count_16_parts;
+			}
+			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+			{ 
+				TIM1->CCR1 = 65535 * (count_16_parts*4-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*4) {
+				TIM1->CCER &= ~TIM_CCER_CC1E;
+				
+				TIM1->CCER |= TIM_CCER_CC2NE;
+				TIM1->CCER &= ~TIM_CCER_CC2E;
+			}
+			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+			{
+				TIM1->CCR2 = 65535 * (i-count_16_parts*4) / count_16_parts;
+			}
+			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+			{
+				TIM1->CCR2 = 65535 * (count_16_parts*6-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*6)
+			{
+				TIM1->CCER |= TIM_CCER_CC2E;
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+			}
+			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+			{
+				TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
+			}
+			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
+			{
+				TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*8)
+			{
+				TIM1->CCER &= ~TIM_CCER_CC2E;
+				
+				TIM1->CCER |= TIM_CCER_CC3NE;
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+			}
+			else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
+			{
+				TIM1->CCR3 = 65535 * (i-count_16_parts*8) / count_16_parts;
+			}
+			else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
+			{
+				TIM1->CCR3 = 65535 * (count_16_parts*10-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*10)
+			{
+				TIM1->CCER |= TIM_CCER_CC3E;
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+			}
+			else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
+			{
+				TIM1->CCR3 = 65535 * (i-count_16_parts*10) / count_16_parts;
+			}
+
+			else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
+			{
+				TIM1->CCR3 = 65535 * (count_16_parts*12-i) / count_16_parts;
+			}
+			else if (i == count_16_parts*12) 
+			{	
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+				
+				TIM1->CCER |= TIM_CCER_CC4E;
+			}
+			else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
+			{	
+				TIM1->CCR4 = 65535 * (i-count_16_parts*12) / count_16_parts;
+			}
+			else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
+			{
+				TIM1->CCR4 = 65535 * (count_16_parts*14-i) / count_16_parts;
+			}
+			//caaa??ea
+			for(d=0;d<delay;d++)
+			{
+			}
+		}
+}
+
+void Counterclockwise_One(void)
+{
+		uint32_t count_16_parts = count/16;
+		TIM1->CCER &= ~TIM_CCER_CC1NE;
+		TIM1->CCR1 = 0;
+		TIM1->CCER |= TIM_CCER_CC4E;
+		for(i=0;i<=count_16_parts*14;i++)
+		{
+			if (restart){
+				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+				| TIM_CCER_CC2E | TIM_CCER_CC2NE
+				| TIM_CCER_CC3E | TIM_CCER_CC3NE
+				| TIM_CCER_CC4E);
+				TIM1->CCR1 = 0;
+				TIM1->CCR2 = 0;
+				TIM1->CCR3 = 0;
+				TIM1->CCR4 = 0;
+				restart = 0;
+				break;
+			}
+			if(i<count_16_parts) 
+			{
+				TIM1->CCR4 = 65535 * i / (count_16_parts);
+			}
+			else if((i>count_16_parts - 1)&&(i<count_16_parts*2)) 
+			{
+				TIM1->CCR4 = 65535 * (count_16_parts*2-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 2)
+			{
+				TIM1->CCER &= ~TIM_CCER_CC4E;
+				
+				TIM1->CCER |= TIM_CCER_CC3E;
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+			}
+			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+			{
+				TIM1->CCR3 = 65535 * (i-count_16_parts*2) / count_16_parts;
+			}
+			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+			{ 
+				TIM1->CCR3 = 65535 * (count_16_parts*4-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 4) 
+			{
+				TIM1->CCER |= TIM_CCER_CC3NE;
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+			}
+			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+			{
+				TIM1->CCR3 = 65535 * (i-count_16_parts*4) / count_16_parts;
+			}
+			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+			{
+				TIM1->CCR3 = 65535 * (count_16_parts*6-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 6)
+			{
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+				
+				TIM1->CCER |= TIM_CCER_CC2E;
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+			}
+			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+			{
+				TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
+			}
+			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
+			{
+				TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 8) 
+			{
+				TIM1->CCER |= TIM_CCER_CC2NE;
+				TIM1->CCER &= ~TIM_CCER_CC2E;
+			}
+			else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
+			{
+				TIM1->CCR2 = 65535 * (i-count_16_parts*8) / count_16_parts;
+			}
+			else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
+			{
+				TIM1->CCR2 = 65535 * (count_16_parts*10-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 10)
+			{
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+				
+				TIM1->CCER |= TIM_CCER_CC1E;
+				TIM1->CCER &= ~TIM_CCER_CC1NE;
+			}
+			else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
+			{
+				TIM1->CCR1 = 65535 * (i-count_16_parts*10) / count_16_parts;
+			}
+			else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
+			{
+				TIM1->CCR2 = 65535 * (count_16_parts*12-i) / count_16_parts;
+			}
+			else if (i == count_16_parts * 12)
+			{
+				TIM1->CCER |= TIM_CCER_CC1NE;
+				TIM1->CCER &= ~TIM_CCER_CC1E;
+			}
+			else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
+			{	
+				TIM1->CCR1 = 65535 * (i-count_16_parts*12) / count_16_parts;
+			}
+			else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
+			{
+				TIM1->CCR1 = 65535 * (count_16_parts*14-i) / count_16_parts;
+			}
+			//caaa??ea
+			for(d=0;d<delay;d++)
+			{
+			}
+		}	
+}
+
+void Clockwise_Two()
+{
+		uint32_t count_16_parts = count/16;
+    TIM1->CCER &= ~TIM_CCER_CC1NP; // polarity on
+		TIM1->CCER |= TIM_CCER_CC1NE | TIM_CCER_CC1E; // channel on
+		for(i=0;i<=count_16_parts*7;i++)
+		{
+			if (restart){
+				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+				| TIM_CCER_CC2E | TIM_CCER_CC2NE
+				| TIM_CCER_CC3E | TIM_CCER_CC3NE
+				| TIM_CCER_CC4E);
+				TIM1->CCER &= ~(TIM_CCER_CC1P | TIM_CCER_CC1NP 
+				| TIM_CCER_CC2P | TIM_CCER_CC2NP
+				| TIM_CCER_CC3P | TIM_CCER_CC3NP
+				| TIM_CCER_CC4P);
+				TIM1->CCR1 = 0;
+				TIM1->CCR2 = 0;
+				TIM1->CCR3 = 0;
+				TIM1->CCR4 = 0;
+				restart = 0;
+				break;
+			}
+			else if(i<count_16_parts) 
+			{
+				TIM1->CCR1 = 65535 * i / (count_16_parts);
+			}
+      else if(i == count_16_parts) 
+      {
+        TIM1->CCER &= ~TIM_CCER_CC1NP; // polarity on
+        TIM1->CCER |= TIM_CCER_CC1E; // channel on
+				TIM1->CCER &= ~TIM_CCER_CC1NE; // comp. channel off
+          
+        TIM1->CCER |= TIM_CCER_CC2NP; // polarity off ??
+        TIM1->CCER |= TIM_CCER_CC2NE; // comp. channel on
+				TIM1->CCER &= ~TIM_CCER_CC2E; // channel off
+      }
+			else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+			{
+				TIM1->CCR1 = 65535 * (count_16_parts*2-i)/(count_16_parts);
+				TIM1->CCR2 = 65535 * (count_16_parts*2-i)/(count_16_parts);
+			}
+      else if(i == count_16_parts*2)
+      {
+        TIM1->CCR1 = 0;
+        TIM1->CCER &= ~TIM_CCER_CC2NP; // polarity on
+        TIM1->CCER |= TIM_CCER_CC2E; // channel on
+      }
+			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+			{
+        TIM1->CCR2 = 65535 * (i-count_16_parts*2)/(count_16_parts);
+			}
+      else if(i == count_16_parts*3)
+      {
+				TIM1->CCER &= ~TIM_CCER_CC2NP;
+				TIM1->CCER |= TIM_CCER_CC2E;
+				TIM1->CCER &= ~TIM_CCER_CC2NE;
+				
+				TIM1->CCER |= TIM_CCER_CC3NP;
+				TIM1->CCER |= TIM_CCER_CC3NE;
+				TIM1->CCER &= ~TIM_CCER_CC3E;
+      }
+			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+			{ 
+				TIM1->CCR2 = 65535 * (count_16_parts*4-i)/(count_16_parts);
+				TIM1->CCR3 = 65535 * (count_16_parts*4-i)/(count_16_parts);
+			}
+      else if(i == count_16_parts*4)
+      {
+				TIM1->CCR2 = 0;
+				TIM1->CCER &= ~TIM_CCER_CC3NP;
+				TIM1->CCER |= TIM_CCER_CC3E;
+      }
+			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+			{
+				TIM1->CCR3 = 65535 * (i-count_16_parts*4)/(count_16_parts);
+			}
+      else if(i == count_16_parts*5)
+      {
+				TIM1->CCER &= ~TIM_CCER_CC3NP;
+				TIM1->CCER |= TIM_CCER_CC3E;
+				TIM1->CCER &= ~TIM_CCER_CC3NE;
+				
+				TIM1->CCER |= TIM_CCER_CC4P;
+				TIM1->CCER |= TIM_CCER_CC4E;
+      }
+			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+			{
+				TIM1->CCR3 = 65535 * (count_16_parts*6-i)/(count_16_parts);
+				TIM1->CCR4 = 65535 * (count_16_parts*6-i)/(count_16_parts);
+			}
+      else if(i == count_16_parts*6)
+      {
+				TIM1->CCR3 = 0;
+				TIM1->CCER |= TIM_CCER_CC1NE;
+				
+				TIM1->CCER &= ~TIM_CCER_CC1NP;
+				TIM1->CCER |= TIM_CCER_CC1NE;
+				TIM1->CCER &= ~TIM_CCER_CC1E;
+      }
+			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+			{
+				TIM1->CCR4 = 65535 * (i-count_16_parts*6)/(count_16_parts);
+				TIM1->CCR1 = 65535 * (i-count_16_parts*6)/(count_16_parts);
+			}
+      else if(i == count_16_parts*7)
+      {
+				TIM1->CCR4 = 65535;
+				
+				TIM1->CCER &= ~TIM_CCER_CC1NP;
+				TIM1->CCER |= TIM_CCER_CC1E;
+				TIM1->CCER |= TIM_CCER_CC1NE;
+      }
+			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
+			{
+			}
+      else if(i == count_16_parts*8)
+      {
+				
+      }
+			
+			for(d=0;d<delay;d++)
+			{
+			}
+		}
+}
+
+void Counterclockwise_Two(void)
+{
+	uint32_t count_16_parts = count/16;
+	//зажжён 7, тухнет 7, загорается 6, выключаем 1, CCR увеличивается
+	TIM1->CCER &= ~TIM_CCER_CC1NE; // отключение комплиментарного канала 1 (1) (на случай если это не первый круг)
+
+	TIM1->CCER |= TIM_CCER_CC4P; // включение полярности на прямом канале 4 (7)
+	TIM1->CCER |= TIM_CCER_CC4E; // включение прямого канала 4 (7)
+
+	TIM1->CCER |= TIM_CCER_CC3E; // включение прямого канала 3 (6)
+	TIM1->CCER &= ~TIM_CCER_CC3NE; // отключение комплиментарного канала 3 (5)
+	for (i = 0;i <= count_16_parts * 7;i++)
+	{
+		if (restart){
+			TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+			| TIM_CCER_CC2E | TIM_CCER_CC2NE
+			| TIM_CCER_CC3E | TIM_CCER_CC3NE
+			| TIM_CCER_CC4E);
+			TIM1->CCER &= ~(TIM_CCER_CC1P | TIM_CCER_CC1NP 
+			| TIM_CCER_CC2P | TIM_CCER_CC2NP
+			| TIM_CCER_CC3P | TIM_CCER_CC3NP
+			| TIM_CCER_CC4P);
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = 0;
+			TIM1->CCR3 = 0;
+			TIM1->CCR4 = 0;
+			restart = 0;
+			break;
+		}
+		if (i < count_16_parts)
+		{
+			TIM1->CCR4 = 65535 * i / (count_16_parts);
+			TIM1->CCR3 = 65535 * i / (count_16_parts);
+		}
+		//зажжён 6, тухнет 6, загорается 5, выключаем 7, CCR уменьшается
+		else if (i == count_16_parts)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC4E; // отключение прямого канала 4 (7)
+
+			TIM1->CCER &= ~TIM_CCER_CC3NP; // включение полярности на комплиментарном канале 3 (5)
+			TIM1->CCER |= TIM_CCER_CC3NE; // включение комплиментарного канала 3 (5)
+		}
+		else if ((i > count_16_parts - 1) && (i < count_16_parts * 2))
+		{
+			TIM1->CCR3 = 65535 * (count_16_parts * 2 - i) / (count_16_parts);
+		}
+		//зажжён 5, тухнет 5, загорается 4, выключаем 6, CCR увеличивается
+		else if (i == count_16_parts * 2)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC3E; // отключение прямого канала 3 (6)
+
+			TIM1->CCER |= TIM_CCER_CC2E; // включение прямого канала 2 (4)
+			TIM1->CCER |= TIM_CCER_CC3NP; // отключение полярности на комплиментарном канале 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC2NE; // отключение комплиментарного канала 2 (3)
+		}
+		else if ((i > count_16_parts * 2 - 1) && (i < count_16_parts * 3))
+		{
+			TIM1->CCR3 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
+			TIM1->CCR2 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
+		}
+		//зажжён 4, тухнет 4, загорается 3, выключаем 5, CCR уменьшается
+		else if (i == count_16_parts * 3)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC3NE; // отключение комплиментарного канала 3 (5)
+
+			TIM1->CCER &= ~TIM_CCER_CC2NP; // включение полярности на комплиментарном канале 2 (3)
+			TIM1->CCER |= TIM_CCER_CC2NE; // включение комплиментарного канала 2 (3)
+		}
+		else if ((i > count_16_parts * 3 - 1) && (i < count_16_parts * 4))
+		{
+			TIM1->CCR2 = 65535 * (count_16_parts * 4 - i) / (count_16_parts);
+		}
+		//зажжён 3, тухнет 3, загорается 2, выключаем 4, CCR увеличивается
+		else if (i == count_16_parts * 4)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC2E; // отключение прямого канала 2 (4)
+
+			TIM1->CCER |= TIM_CCER_CC1E; // включение прямого канала 1 (2)
+			TIM1->CCER |= TIM_CCER_CC2NP; // отключение полярности на комплиментарном канале 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC1NE; // отключение комплиментарного канала 1 (1)
+		}
+		else if ((i > count_16_parts * 4 - 1) && (i < count_16_parts * 5))
+		{
+			TIM1->CCR2 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
+			TIM1->CCR1 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
+		}
+		//зажжён 2, тухнет 2, загорается 1, выключаем 3, CCR уменьшается
+		else if (i == count_16_parts * 5)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC2NE; // отключение комплиментарного канала 2 (3)
+
+			TIM1->CCER &= ~TIM_CCER_CC1NP; // включение полярности на комплиментарном канале 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1NE; // включение комплиментарного канала 1 (1)
+		}
+		else if ((i > count_16_parts * 5 - 1) && (i < count_16_parts * 6))
+		{
+			TIM1->CCR1 = 65535 * (count_16_parts * 6 - i) / (count_16_parts);
+		}
+		//зажжён 1, тухнет 1, загорается 7, выключаем 2, CCR увеличивается
+		else if (i == count_16_parts * 6)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC1E; // отключение прямого канала 1 (2)
+
+			TIM1->CCER |= TIM_CCER_CC1NP; // отключение полярности на комплиментарном канале 1 (1)
+			
+			TIM1->CCER &= ~TIM_CCER_CC4P; // отключение полярности на прямом канале 4 (7) (на случай если это не первый круг)
+			TIM1->CCER |= TIM_CCER_CC4E; // включение прямого канала 4 (7)
+		}
+		else if ((i > count_16_parts * 6 - 1) && (i < count_16_parts * 7))
+		{
+			TIM1->CCR1 = 65535 * (i - count_16_parts * 6) / (count_16_parts);
+			TIM1->CCR4 = 65535 * (i - count_16_parts * 6) / (count_16_parts);
+		}
+		else if (i == count_16_parts * 7)
+		{
+		}
+		else if ((i > count_16_parts * 7 - 1) && (i < count_16_parts * 8))
+		{
+		}
+		else if (i == count_16_parts * 8)
+		{
+		}
+
+		for (d = 0;d < delay;d++)
+		{
+		}
+	}
 }
 
 /**
