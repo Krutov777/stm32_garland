@@ -45,22 +45,22 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
 uint8_t flag_key1_press = 1;
 uint32_t time_key1_press = 0;
-uint32_t count = 65536;
-uint32_t count_one_led = 65536; //для всех режимов кроме 004 сек(для одного светодиода)
-uint32_t count_one_led004sec = 65536;
-uint32_t count_two_leds = 65536; //для всех режимов кроме 004 сек(для одного светодиода)
-uint32_t count_two_led004sec = 65536;
+uint32_t count = 16384;
+uint32_t count_one_led = 16384; //для всех режимов кроме 004 сек(для одного светодиода)
+uint32_t count_one_led004sec = 16384;
+uint32_t count_two_leds = 16384; //для всех режимов кроме 004 сек(для одного светодиода)
+uint32_t count_two_led004sec = 16384;
 // count = 32768; для двух светодиодов старый
-uint32_t delay = 717;//с учетом оптизимацией O1
+uint32_t delay = 500;//с учетом оптизимацией O1
 uint32_t i;
 volatile uint32_t d; //
-uint32_t delay_1sec_one_led = 717;
+uint32_t delay_1sec_one_led = 500;
 uint32_t delay_05sec_one_led = 351;
 uint32_t delay_025sec_one_led = 168;
 uint32_t delay_004sec_one_led = 14;//4мс погрешность
-uint32_t delay_1sec_two_leds = 149;
-uint32_t delay_05sec_two_leds = 60;
-uint32_t delay_025sec_two_leds = 15;
+uint32_t delay_1sec_two_leds = 1000;
+uint32_t delay_05sec_two_leds = 500;
+uint32_t delay_025sec_two_leds = 200;
 uint32_t delay_004sec_two_leds = 0;
 _Bool direction_mode = 0;
 uint8_t number_leds_mode = 1;
@@ -540,7 +540,7 @@ void Counterclockwise_One(void)
 			}
 			else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
 			{
-				TIM1->CCR2 = 65535 * (count_16_parts*12-i) / count_16_parts;
+				TIM1->CCR1 = 65535 * (count_16_parts*12-i) / count_16_parts;
 			}
 			else if (i == count_16_parts * 12)
 			{
