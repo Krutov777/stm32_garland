@@ -46,22 +46,18 @@ TIM_HandleTypeDef htim3;
 uint8_t flag_key1_press = 1;
 uint32_t time_key1_press = 0;
 uint32_t count = 16384;
-uint32_t count_one_led = 16384; //для всех режимов кроме 004 сек(для одного светодиода)
-uint32_t count_one_led004sec = 16384;
-uint32_t count_two_leds = 16384; //для всех режимов кроме 004 сек(для одного светодиода)
-uint32_t count_two_led004sec = 16384;
-// count = 32768; для двух светодиодов старый
-uint32_t delay = 500;//с учетом оптизимацией O1
+
+uint32_t delay = 891;//с учетом оптизимацией o0
 uint32_t i;
 volatile uint32_t d; //
-uint32_t delay_1sec_one_led = 500;
-uint32_t delay_05sec_one_led = 351;
-uint32_t delay_025sec_one_led = 168;
-uint32_t delay_004sec_one_led = 14;//4мс погрешность
-uint32_t delay_1sec_two_leds = 1000;
-uint32_t delay_05sec_two_leds = 500;
-uint32_t delay_025sec_two_leds = 200;
-uint32_t delay_004sec_two_leds = 0;
+uint32_t delay_1sec_one_led = 891;
+uint32_t delay_05sec_one_led = 441;
+uint32_t delay_025sec_one_led = 216;
+uint32_t delay_004sec_one_led = 26;//4мс погрешность
+uint32_t delay_1sec_two_leds = 1794;
+uint32_t delay_05sec_two_leds = 894;
+uint32_t delay_025sec_two_leds = 443;
+uint32_t delay_004sec_two_leds = 65;
 _Bool direction_mode = 0;
 uint8_t number_leds_mode = 1;
 uint8_t switch_speeds_mode = 1;
@@ -270,26 +266,17 @@ void switch_speeds_one_led(uint16_t speed_mode) {
 	// 2 - 0.5 с, те 1 с
 	// 3 - 0.25 с, те 0.5 с
 	// 4 - 0.04 с, те 0.08 с
-	
 	if (speed_mode == 1) {
 		delay = delay_1sec_one_led;
-		count = count_one_led;
 	}
 	else if (speed_mode == 2) {
 		delay = delay_05sec_one_led;
-		count = count_one_led;
 	}
 	else if (speed_mode == 3) {
 		delay = delay_025sec_one_led;
-		count = count_one_led;
 	}
-	else if (speed_mode == 4) {
+	else  {
 		delay = delay_004sec_one_led;
-		count = count_one_led004sec; //для 004 сек режим
-	}
-	else {
-		count = count_one_led;
-		delay = delay_1sec_one_led;
 	}
 }
 
@@ -302,23 +289,15 @@ void switch_speeds_two_led(uint16_t speed_mode) {
 	
 	if (speed_mode == 1) {
 		delay = delay_1sec_two_leds;
-		count = count_two_leds;
 	}
 	else if (speed_mode == 2) {
 		delay = delay_05sec_two_leds;
-		count = count_two_leds;
 	}
 	else if (speed_mode == 3) {
 		delay = delay_025sec_two_leds;
-		count = count_two_leds;
-	}
-	else if (speed_mode == 4) {
-		delay = delay_004sec_two_leds;
-		count = count_two_led004sec; //для 004 сек режим
 	}
 	else {
-		count = count_two_leds;
-		delay = delay_1sec_two_leds;
+		delay = delay_004sec_two_leds;
 	}
 }
 
