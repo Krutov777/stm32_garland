@@ -47,13 +47,13 @@ uint8_t flag_key1_press = 1;
 uint32_t time_key1_press = 0;
 uint32_t count = 16384;
 
-uint32_t delay = 891;//с учетом оптизимацией o0
+uint32_t delay = 891;//n o?aoii iioeceiaoeae o0
 uint32_t i;
 volatile uint32_t d; //
 uint32_t delay_1sec_one_led = 891;
 uint32_t delay_05sec_one_led = 441;
 uint32_t delay_025sec_one_led = 216;
-uint32_t delay_004sec_one_led = 26;//4мс погрешность
+uint32_t delay_004sec_one_led = 26;//4in iia?aoiinou
 uint32_t delay_1sec_two_leds = 1794;
 uint32_t delay_05sec_two_leds = 894;
 uint32_t delay_025sec_two_leds = 443;
@@ -102,7 +102,7 @@ int fputc(int c, FILE *f) {
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	//uint32_t i, d; // d-для задержки
+	//uint32_t i, d; // d-aey caaa??ee
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -126,13 +126,13 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_1);//запустим ШИМ
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_1);//запустим ШИМ
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_2);//запустим ШИМ
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_2);//запустим ШИМ
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_3);//запустим ШИМ
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_3);//запустим ШИМ
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_4);//запустим ШИМ
+	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_1);//caionoei OEI
+	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_1);//caionoei OEI
+	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_2);//caionoei OEI
+	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_2);//caionoei OEI
+	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_3);//caionoei OEI
+	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_3);//caionoei OEI
+	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_4);//caionoei OEI
 	GPIO_InitTypeDef GPIO_InitStruct = {0};
 	GPIO_InitStruct.Pin = GPIO_PIN_15;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
@@ -186,10 +186,10 @@ void EXTI0_IRQHandler(void)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
 	{
 		flag_key1_press = 0;
-		// действие на нажатие
+		// aaenoaea ia ia?aoea
 		if(switch_speeds_mode == 1 || switch_speeds_mode == 2 || switch_speeds_mode == 3)
 			++switch_speeds_mode;
 		else
@@ -213,10 +213,10 @@ void EXTI1_IRQHandler(void)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
 	{
 		flag_key1_press = 0;
-		// действие на нажатие
+		// aaenoaea ia ia?aoea
 		if(direction_mode == 1)
 			direction_mode = 0;
 		else direction_mode = 1;
@@ -241,10 +241,10 @@ void EXTI2_TSC_IRQHandler(void)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_RESET && flag_key1_press) // подставить свой пин
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
 	{
 		flag_key1_press = 0;
-		// действие на нажатие
+		// aaenoaea ia ia?aoea
 		if(number_leds_mode == 1)
 			++number_leds_mode;
 		else number_leds_mode = 1;
@@ -262,10 +262,10 @@ void EXTI2_TSC_IRQHandler(void)
 
 void switch_speeds_one_led(uint16_t speed_mode) {
 	// speed mode =
-	// 1 - 1 с на зажигание и затухание, те 2 с
-	// 2 - 0.5 с, те 1 с
-	// 3 - 0.25 с, те 0.5 с
-	// 4 - 0.04 с, те 0.08 с
+	// 1 - 1 n ia ca?eaaiea e caoooaiea, oa 2 n
+	// 2 - 0.5 n, oa 1 n
+	// 3 - 0.25 n, oa 0.5 n
+	// 4 - 0.04 n, oa 0.08 n
 	if (speed_mode == 1) {
 		delay = delay_1sec_one_led;
 	}
@@ -282,10 +282,10 @@ void switch_speeds_one_led(uint16_t speed_mode) {
 
 void switch_speeds_two_led(uint16_t speed_mode) {
 	// speed mode =
-	// 1 - 1 с на зажигание и затухание, те 2 с
-	// 2 - 0.5 с, те 1 с
-	// 3 - 0.25 с, те 0.5 с
-	// 4 - 0.04 с, те 0.08 с
+	// 1 - 1 n ia ca?eaaiea e caoooaiea, oa 2 n
+	// 2 - 0.5 n, oa 1 n
+	// 3 - 0.25 n, oa 0.5 n
+	// 4 - 0.04 n, oa 0.08 n
 	
 	if (speed_mode == 1) {
 		delay = delay_1sec_two_leds;
@@ -654,13 +654,7 @@ void Clockwise_Two()
 				TIM1->CCER |= TIM_CCER_CC1E;
 				TIM1->CCER |= TIM_CCER_CC1NE;
       }
-			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
-			{
-			}
-      else if(i == count_16_parts*8)
-      {
-				
-      }
+			
 			
 			for(d=0;d<delay;d++)
 			{
@@ -671,6 +665,7 @@ void Clockwise_Two()
 void Counterclockwise_Two(void)
 {
 	uint32_t count_16_parts = count/16;
+
 	//зажжён 7, тухнет 7, загорается 6, выключаем 1, CCR увеличивается
 	TIM1->CCER &= ~TIM_CCER_CC1NE; // отключение комплиментарного канала 1 (1) (на случай если это не первый круг)
 
@@ -702,79 +697,79 @@ void Counterclockwise_Two(void)
 			TIM1->CCR4 = 65535 * i / (count_16_parts);
 			TIM1->CCR3 = 65535 * i / (count_16_parts);
 		}
-		//зажжён 6, тухнет 6, загорается 5, выключаем 7, CCR уменьшается
+		//ca???i 6, oooiao 6, caai?aaony 5, auee??aai 7, CCR oiaiuoaaony
 		else if (i == count_16_parts)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC4E; // отключение прямого канала 4 (7)
+			TIM1->CCER &= ~TIM_CCER_CC4E; // ioee??aiea i?yiiai eaiaea 4 (7)
 
-			TIM1->CCER &= ~TIM_CCER_CC3NP; // включение полярности на комплиментарном канале 3 (5)
-			TIM1->CCER |= TIM_CCER_CC3NE; // включение комплиментарного канала 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC3NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 3 (5)
+			TIM1->CCER |= TIM_CCER_CC3NE; // aee??aiea eiiieeiaioa?iiai eaiaea 3 (5)
 		}
 		else if ((i > count_16_parts - 1) && (i < count_16_parts * 2))
 		{
 			TIM1->CCR3 = 65535 * (count_16_parts * 2 - i) / (count_16_parts);
 		}
-		//зажжён 5, тухнет 5, загорается 4, выключаем 6, CCR увеличивается
+		//ca???i 5, oooiao 5, caai?aaony 4, auee??aai 6, CCR oaaee?eaaaony
 		else if (i == count_16_parts * 2)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC3E; // отключение прямого канала 3 (6)
+			TIM1->CCER &= ~TIM_CCER_CC3E; // ioee??aiea i?yiiai eaiaea 3 (6)
 
-			TIM1->CCER |= TIM_CCER_CC2E; // включение прямого канала 2 (4)
-			TIM1->CCER |= TIM_CCER_CC3NP; // отключение полярности на комплиментарном канале 3 (5)
-			TIM1->CCER &= ~TIM_CCER_CC2NE; // отключение комплиментарного канала 2 (3)
+			TIM1->CCER |= TIM_CCER_CC2E; // aee??aiea i?yiiai eaiaea 2 (4)
+			TIM1->CCER |= TIM_CCER_CC3NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC2NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
 		}
 		else if ((i > count_16_parts * 2 - 1) && (i < count_16_parts * 3))
 		{
 			TIM1->CCR3 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
 			TIM1->CCR2 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
 		}
-		//зажжён 4, тухнет 4, загорается 3, выключаем 5, CCR уменьшается
+		//ca???i 4, oooiao 4, caai?aaony 3, auee??aai 5, CCR oiaiuoaaony
 		else if (i == count_16_parts * 3)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC3NE; // отключение комплиментарного канала 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC3NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 3 (5)
 
-			TIM1->CCER &= ~TIM_CCER_CC2NP; // включение полярности на комплиментарном канале 2 (3)
-			TIM1->CCER |= TIM_CCER_CC2NE; // включение комплиментарного канала 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC2NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 2 (3)
+			TIM1->CCER |= TIM_CCER_CC2NE; // aee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
 		}
 		else if ((i > count_16_parts * 3 - 1) && (i < count_16_parts * 4))
 		{
 			TIM1->CCR2 = 65535 * (count_16_parts * 4 - i) / (count_16_parts);
 		}
-		//зажжён 3, тухнет 3, загорается 2, выключаем 4, CCR увеличивается
+		//ca???i 3, oooiao 3, caai?aaony 2, auee??aai 4, CCR oaaee?eaaaony
 		else if (i == count_16_parts * 4)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC2E; // отключение прямого канала 2 (4)
+			TIM1->CCER &= ~TIM_CCER_CC2E; // ioee??aiea i?yiiai eaiaea 2 (4)
 
-			TIM1->CCER |= TIM_CCER_CC1E; // включение прямого канала 1 (2)
-			TIM1->CCER |= TIM_CCER_CC2NP; // отключение полярности на комплиментарном канале 2 (3)
-			TIM1->CCER &= ~TIM_CCER_CC1NE; // отключение комплиментарного канала 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1E; // aee??aiea i?yiiai eaiaea 1 (2)
+			TIM1->CCER |= TIM_CCER_CC2NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC1NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 1 (1)
 		}
 		else if ((i > count_16_parts * 4 - 1) && (i < count_16_parts * 5))
 		{
 			TIM1->CCR2 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
 			TIM1->CCR1 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
 		}
-		//зажжён 2, тухнет 2, загорается 1, выключаем 3, CCR уменьшается
+		//ca???i 2, oooiao 2, caai?aaony 1, auee??aai 3, CCR oiaiuoaaony
 		else if (i == count_16_parts * 5)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC2NE; // отключение комплиментарного канала 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC2NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
 
-			TIM1->CCER &= ~TIM_CCER_CC1NP; // включение полярности на комплиментарном канале 1 (1)
-			TIM1->CCER |= TIM_CCER_CC1NE; // включение комплиментарного канала 1 (1)
+			TIM1->CCER &= ~TIM_CCER_CC1NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1NE; // aee??aiea eiiieeiaioa?iiai eaiaea 1 (1)
 		}
 		else if ((i > count_16_parts * 5 - 1) && (i < count_16_parts * 6))
 		{
 			TIM1->CCR1 = 65535 * (count_16_parts * 6 - i) / (count_16_parts);
 		}
-		//зажжён 1, тухнет 1, загорается 7, выключаем 2, CCR увеличивается
+		//ca???i 1, oooiao 1, caai?aaony 7, auee??aai 2, CCR oaaee?eaaaony
 		else if (i == count_16_parts * 6)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC1E; // отключение прямого канала 1 (2)
+			TIM1->CCER &= ~TIM_CCER_CC1E; // ioee??aiea i?yiiai eaiaea 1 (2)
 
-			TIM1->CCER |= TIM_CCER_CC1NP; // отключение полярности на комплиментарном канале 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 1 (1)
 			
-			TIM1->CCER &= ~TIM_CCER_CC4P; // отключение полярности на прямом канале 4 (7) (на случай если это не первый круг)
-			TIM1->CCER |= TIM_CCER_CC4E; // включение прямого канала 4 (7)
+			TIM1->CCER &= ~TIM_CCER_CC4P; // ioee??aiea iiey?iinoe ia i?yiii eaiaea 4 (7) (ia neo?ae anee yoi ia ia?aue e?oa)
+			TIM1->CCER |= TIM_CCER_CC4E; // aee??aiea i?yiiai eaiaea 4 (7)
 		}
 		else if ((i > count_16_parts * 6 - 1) && (i < count_16_parts * 7))
 		{
@@ -782,12 +777,6 @@ void Counterclockwise_Two(void)
 			TIM1->CCR4 = 65535 * (i - count_16_parts * 6) / (count_16_parts);
 		}
 		else if (i == count_16_parts * 7)
-		{
-		}
-		else if ((i > count_16_parts * 7 - 1) && (i < count_16_parts * 8))
-		{
-		}
-		else if (i == count_16_parts * 8)
 		{
 		}
 
@@ -1001,6 +990,22 @@ static void MX_TIM3_Init(void)
   * @param None
   * @retval None
   */
+
+/* USER CODE BEGIN 4 */
+
+/* USER CODE END 4 */
+
+/**
+  * @brief  This function is executed in case of error occurrence.
+  * @retval None
+  */
+
+
+/**
+  * @brief GPIO Initialization Function
+  * @param None
+  * @retval None
+  */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -1013,14 +1018,17 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4, GPIO_PIN_SET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PC0 PC1 PC2 */
   GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLDOWN;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PC4 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4;
+  /*Configure GPIO pins : PC4 PC5 PC6 PC7 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
