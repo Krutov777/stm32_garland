@@ -399,11 +399,6 @@
               <FilePath>.\main.h</FilePath>
             </File>
             <File>
-              <FileName>ports.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ports.h</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
