@@ -47,13 +47,13 @@ uint8_t flag_key1_press = 1;
 uint32_t time_key1_press = 0;
 uint32_t count = 16384;
 
-uint32_t delay = 891;//n o?aoii iioeceiaoeae o0
+uint32_t delay = 891;
 uint32_t i;
 volatile uint32_t d; //
 uint32_t delay_1sec_one_led = 891;
 uint32_t delay_05sec_one_led = 441;
 uint32_t delay_025sec_one_led = 216;
-uint32_t delay_004sec_one_led = 26;//4in iia?aoiinou
+uint32_t delay_004sec_one_led = 26;
 uint32_t delay_1sec_two_leds = 1794;
 uint32_t delay_05sec_two_leds = 894;
 uint32_t delay_025sec_two_leds = 443;
@@ -82,7 +82,6 @@ void Counterclockwise_Two(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 int SER_PutChar(int c) {
   ITM_SendChar (c);
   return (c);
@@ -124,26 +123,24 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_1);//caionoei OEI
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_1);//caionoei OEI
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_2);//caionoei OEI
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_2);//caionoei OEI
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_3);//caionoei OEI
-	HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_3);//caionoei OEI
-	HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_4);//caionoei OEI
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	GPIO_InitStruct.Pin = GPIO_PIN_15;
-	GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
-	HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
-	__HAL_TIM_ENABLE_IT(&htim1, TIM_IT_BREAK);
-	
-	TIM1->CCER &= ~TIM_CCER_CC2NE;
-	TIM1->CCER &= ~TIM_CCER_CC3NE;
-	
-	
+  HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_1);   // start shim on cannel 1(ch1)
+  HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_1);// start shim on complimentary channel 1(ch1n)
+  HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_2);
+  HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_3);
+  HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_4);
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+  __HAL_TIM_ENABLE_IT(&htim1, TIM_IT_BREAK);
+  
+  TIM1->CCER &= ~TIM_CCER_CC2NE; // clear bits in ch2n and ch3n that is disable this channels
+  TIM1->CCER &= ~TIM_CCER_CC3NE;
   /* USER CODE END 2 */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -177,17 +174,19 @@ int main(void)
   /* USER CODE END 3 */
 }
 
+// handler for k0 button with external interrupt - speed mode
 void EXTI0_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_IRQn 0 */
+	// chatter protection with 100ms time
 	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_0) == GPIO_PIN_RESET && flag_key1_press)
 	{
 		flag_key1_press = 0;
-		// aaenoaea ia ia?aoea
+		// click action
 		if(switch_speeds_mode == 1 || switch_speeds_mode == 2 || switch_speeds_mode == 3)
 			++switch_speeds_mode;
 		else
@@ -205,16 +204,17 @@ void EXTI0_IRQHandler(void)
 /**
   * @brief This function handles EXTI line1 interrupt.
   */
+// handler for k1 button with external interrupt - direction mode
 void EXTI1_IRQHandler(void)
 {
+	// chatter protection with 100ms time
 	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET && flag_key1_press)
 	{
 		flag_key1_press = 0;
-		// aaenoaea ia ia?aoea
 		if(direction_mode == 1)
 			direction_mode = 0;
 		else direction_mode = 1;
@@ -232,22 +232,23 @@ void EXTI1_IRQHandler(void)
 /**
   * @brief This function handles EXTI line2 and Touch Sense controller.
   */
+// handler for k2 button with external interrupt - number leds mode
 void EXTI2_TSC_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_TSC_IRQn 0 */
+  	// chatter protection with 100ms time
 	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
 	{
 		flag_key1_press = 1;
 	}
-	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_RESET && flag_key1_press) // iianoaaeou naie iei
+	if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_2) == GPIO_PIN_RESET && flag_key1_press)
 	{
 		flag_key1_press = 0;
-		// aaenoaea ia ia?aoea
 		if(number_leds_mode == 1)
 			++number_leds_mode;
 		else number_leds_mode = 1;
 		printf("number of leds = %i\n", number_leds_mode);
-		restart = 1;
+		restart = 1; // flag for reset mode
 		time_key1_press = HAL_GetTick();
 	}
   /* USER CODE END EXTI2_TSC_IRQn 0 */
@@ -260,10 +261,11 @@ void EXTI2_TSC_IRQHandler(void)
 
 void switch_speeds_one_led(uint16_t speed_mode) {
 	// speed mode =
-	// 1 - 1 n ia ca?eaaiea e caoooaiea, oa 2 n
-	// 2 - 0.5 n, oa 1 n
-	// 3 - 0.25 n, oa 0.5 n
-	// 4 - 0.04 n, oa 0.08 n
+	// 1 - 1 s for ignition and decay, those are 2 s
+	// 2 - 0.5 s, those are 1 s
+	// 3 - 0.25s, those are 0.5s
+	// 4 - 0.04 s, those 0.08 s
+
 	if (speed_mode == 1) {
 		delay = delay_1sec_one_led;
 	}
@@ -280,10 +282,10 @@ void switch_speeds_one_led(uint16_t speed_mode) {
 
 void switch_speeds_two_led(uint16_t speed_mode) {
 	// speed mode =
-	// 1 - 1 n ia ca?eaaiea e caoooaiea, oa 2 n
-	// 2 - 0.5 n, oa 1 n
-	// 3 - 0.25 n, oa 0.5 n
-	// 4 - 0.04 n, oa 0.08 n
+	// 1 - 1 s for ignition and decay, those are 2 s
+	// 2 - 0.5 s, those are 1 s
+	// 3 - 0.25s, those are 0.5s
+	// 4 - 0.04 s, those 0.08 s
 	
 	if (speed_mode == 1) {
 		delay = delay_1sec_two_leds;
@@ -301,380 +303,377 @@ void switch_speeds_two_led(uint16_t speed_mode) {
 
 void Clockwise_One(void)
 {
-	  uint32_t count_16_parts = count/16;
-		TIM1->CCER &= ~TIM_CCER_CC4E;
-		TIM1->CCR4 = 0;
+	uint32_t count_16_parts = count/16;
+	TIM1->CCER &= ~TIM_CCER_CC4E;// clear bits in ch4 that is disable this channel
+	TIM1->CCR4 = 0;              // set zero value for ch4, so that the LED does not light up
 	
-		TIM1->CCER |= TIM_CCER_CC1NE;
-		TIM1->CCER &= ~TIM_CCER_CC1E;
-		for(i=0;i<=count_16_parts*14;i++)
+	TIM1->CCER |= TIM_CCER_CC1NE;// set bits for ch1n that is enable this channel
+	TIM1->CCER &= ~TIM_CCER_CC1E;// disable ch1
+	for(i=0;i<=count_16_parts*14;i++)
+	{
+		if (restart) // if flag restart = 1 then clear all channels
 		{
-			if (restart){
-				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
-				| TIM_CCER_CC2E | TIM_CCER_CC2NE
-				| TIM_CCER_CC3E | TIM_CCER_CC3NE
-				| TIM_CCER_CC4E);
-				TIM1->CCR1 = 0;
-				TIM1->CCR2 = 0;
-				TIM1->CCR3 = 0;
-				TIM1->CCR4 = 0;
-				restart = 0;
-				break;
-			}
-			//volatile int i;
-			if(i<count_16_parts) 
-			{
-				TIM1->CCR1 = 65535 * i / (count_16_parts);
-			}
-			else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
-			{
-				TIM1->CCR1 = 65535 * (count_16_parts*2-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*2) 
-			{
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
-			}
-			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
-			{
-				TIM1->CCR1 = 65535 * (i-count_16_parts*2) / count_16_parts;
-			}
-			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
-			{ 
-				TIM1->CCR1 = 65535 * (count_16_parts*4-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*4) {
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-				
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-			}
-			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
-			{
-				TIM1->CCR2 = 65535 * (i-count_16_parts*4) / count_16_parts;
-			}
-			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
-			{
-				TIM1->CCR2 = 65535 * (count_16_parts*6-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*6)
-			{
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
-			{
-				TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
-			}
-			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
-			{
-				TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*8)
-			{
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-				
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
-			{
-				TIM1->CCR3 = 65535 * (i-count_16_parts*8) / count_16_parts;
-			}
-			else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
-			{
-				TIM1->CCR3 = 65535 * (count_16_parts*10-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*10)
-			{
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
-			{
-				TIM1->CCR3 = 65535 * (i-count_16_parts*10) / count_16_parts;
-			}
-
-			else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
-			{
-				TIM1->CCR3 = 65535 * (count_16_parts*12-i) / count_16_parts;
-			}
-			else if (i == count_16_parts*12) 
-			{	
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-				
-				TIM1->CCER |= TIM_CCER_CC4E;
-			}
-			else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
-			{	
-				TIM1->CCR4 = 65535 * (i-count_16_parts*12) / count_16_parts;
-			}
-			else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
-			{
-				TIM1->CCR4 = 65535 * (count_16_parts*14-i) / count_16_parts;
-			}
-			//caaa??ea
-			for(d=0;d<delay;d++)
-			{
-			}
+			TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+			| TIM_CCER_CC2E | TIM_CCER_CC2NE
+			| TIM_CCER_CC3E | TIM_CCER_CC3NE
+			| TIM_CCER_CC4E);
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = 0;
+			TIM1->CCR3 = 0;
+			TIM1->CCR4 = 0;
+			restart = 0;
+			break;
 		}
+		if(i<count_16_parts) 
+		{
+			TIM1->CCR1 = 65535 * i / (count_16_parts);
+		}
+		else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+		{
+			TIM1->CCR1 = 65535 * (count_16_parts*2-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*2) 
+		{
+			TIM1->CCER |= TIM_CCER_CC1E;
+			TIM1->CCER &= ~TIM_CCER_CC1NE;
+		}
+		else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+		{
+			TIM1->CCR1 = 65535 * (i-count_16_parts*2) / count_16_parts;
+		}
+		else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+		{ 
+			TIM1->CCR1 = 65535 * (count_16_parts*4-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*4) {
+			TIM1->CCER &= ~TIM_CCER_CC1E;
+			
+			TIM1->CCER |= TIM_CCER_CC2NE;
+			TIM1->CCER &= ~TIM_CCER_CC2E;
+		}
+		else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+		{
+			TIM1->CCR2 = 65535 * (i-count_16_parts*4) / count_16_parts;
+		}
+		else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+		{
+			TIM1->CCR2 = 65535 * (count_16_parts*6-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*6)
+		{
+			TIM1->CCER |= TIM_CCER_CC2E;
+			TIM1->CCER &= ~TIM_CCER_CC2NE;
+		}
+		else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+		{
+			TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
+		}
+		else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
+		{
+			TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*8)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC2E;
+			
+			TIM1->CCER |= TIM_CCER_CC3NE;
+			TIM1->CCER &= ~TIM_CCER_CC3E;
+		}
+		else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
+		{
+			TIM1->CCR3 = 65535 * (i-count_16_parts*8) / count_16_parts;
+		}
+		else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
+		{
+			TIM1->CCR3 = 65535 * (count_16_parts*10-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*10)
+		{
+			TIM1->CCER |= TIM_CCER_CC3E;
+			TIM1->CCER &= ~TIM_CCER_CC3NE;
+		}
+		else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
+		{
+			TIM1->CCR3 = 65535 * (i-count_16_parts*10) / count_16_parts;
+		}
+		else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
+		{
+			TIM1->CCR3 = 65535 * (count_16_parts*12-i) / count_16_parts;
+		}
+		else if (i == count_16_parts*12) 
+		{	
+			TIM1->CCER &= ~TIM_CCER_CC3E;
+			
+			TIM1->CCER |= TIM_CCER_CC4E;
+		}
+		else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
+		{	
+			TIM1->CCR4 = 65535 * (i-count_16_parts*12) / count_16_parts;
+		}
+		else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
+		{
+			TIM1->CCR4 = 65535 * (count_16_parts*14-i) / count_16_parts;
+		}
+		//delay
+		for(d=0;d<delay;d++)
+		{
+		}
+	}
 }
 
 void Counterclockwise_One(void)
 {
-		uint32_t count_16_parts = count/16;
-		TIM1->CCER &= ~TIM_CCER_CC1NE;
-		TIM1->CCR1 = 0;
-		TIM1->CCER |= TIM_CCER_CC4E;
-		for(i=0;i<=count_16_parts*14;i++)
+	uint32_t count_16_parts = count/16;
+	TIM1->CCER &= ~TIM_CCER_CC1NE; // disable ch1n
+	TIM1->CCR1 = 0;
+	TIM1->CCER |= TIM_CCER_CC4E;   // set bits for ch4nthat is enable this channel
+	for(i=0;i<=count_16_parts*14;i++)
+	{
+		if (restart) { // if flag restart = 1 then clear all channels
+			TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+			| TIM_CCER_CC2E | TIM_CCER_CC2NE
+			| TIM_CCER_CC3E | TIM_CCER_CC3NE
+			| TIM_CCER_CC4E);
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = 0;
+			TIM1->CCR3 = 0;
+			TIM1->CCR4 = 0;
+			restart = 0;
+			break;
+		}
+		if(i<count_16_parts) 
 		{
-			if (restart){
-				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
-				| TIM_CCER_CC2E | TIM_CCER_CC2NE
-				| TIM_CCER_CC3E | TIM_CCER_CC3NE
-				| TIM_CCER_CC4E);
-				TIM1->CCR1 = 0;
-				TIM1->CCR2 = 0;
-				TIM1->CCR3 = 0;
-				TIM1->CCR4 = 0;
-				restart = 0;
-				break;
-			}
-			if(i<count_16_parts) 
-			{
-				TIM1->CCR4 = 65535 * i / (count_16_parts);
-			}
-			else if((i>count_16_parts - 1)&&(i<count_16_parts*2)) 
-			{
-				TIM1->CCR4 = 65535 * (count_16_parts*2-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 2)
-			{
-				TIM1->CCER &= ~TIM_CCER_CC4E;
-				
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-			}
-			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
-			{
-				TIM1->CCR3 = 65535 * (i-count_16_parts*2) / count_16_parts;
-			}
-			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
-			{ 
-				TIM1->CCR3 = 65535 * (count_16_parts*4-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 4) 
-			{
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-			}
-			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
-			{
-				TIM1->CCR3 = 65535 * (i-count_16_parts*4) / count_16_parts;
-			}
-			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
-			{
-				TIM1->CCR3 = 65535 * (count_16_parts*6-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 6)
-			{
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-				
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-			}
-			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
-			{
-				TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
-			}
-			else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
-			{
-				TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 8) 
-			{
-				TIM1->CCER |= TIM_CCER_CC2NE;
-				TIM1->CCER &= ~TIM_CCER_CC2E;
-			}
-			else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
-			{
-				TIM1->CCR2 = 65535 * (i-count_16_parts*8) / count_16_parts;
-			}
-			else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
-			{
-				TIM1->CCR2 = 65535 * (count_16_parts*10-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 10)
-			{
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-				
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER &= ~TIM_CCER_CC1NE;
-			}
-			else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
-			{
-				TIM1->CCR1 = 65535 * (i-count_16_parts*10) / count_16_parts;
-			}
-			else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
-			{
-				TIM1->CCR1 = 65535 * (count_16_parts*12-i) / count_16_parts;
-			}
-			else if (i == count_16_parts * 12)
-			{
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-			}
-			else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
-			{	
-				TIM1->CCR1 = 65535 * (i-count_16_parts*12) / count_16_parts;
-			}
-			else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
-			{
-				TIM1->CCR1 = 65535 * (count_16_parts*14-i) / count_16_parts;
-			}
-			//caaa??ea
-			for(d=0;d<delay;d++)
-			{
-			}
-		}	
+			TIM1->CCR4 = 65535 * i / (count_16_parts);
+		}
+		else if((i>count_16_parts - 1)&&(i<count_16_parts*2)) 
+		{
+			TIM1->CCR4 = 65535 * (count_16_parts*2-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 2)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC4E;
+			
+			TIM1->CCER |= TIM_CCER_CC3E;
+			TIM1->CCER &= ~TIM_CCER_CC3NE;
+		}
+		else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+		{
+			TIM1->CCR3 = 65535 * (i-count_16_parts*2) / count_16_parts;
+		}
+		else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+		{ 
+			TIM1->CCR3 = 65535 * (count_16_parts*4-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 4) 
+		{
+			TIM1->CCER |= TIM_CCER_CC3NE;
+			TIM1->CCER &= ~TIM_CCER_CC3E;
+		}
+		else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+		{
+			TIM1->CCR3 = 65535 * (i-count_16_parts*4) / count_16_parts;
+		}
+		else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+		{
+			TIM1->CCR3 = 65535 * (count_16_parts*6-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 6)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC3NE;
+			
+			TIM1->CCER |= TIM_CCER_CC2E;
+			TIM1->CCER &= ~TIM_CCER_CC2NE;
+		}
+		else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+		{
+			TIM1->CCR2 = 65535 * (i-count_16_parts*6) / count_16_parts;
+		}
+		else if((i>count_16_parts*7 - 1)&&(i<count_16_parts*8))
+		{
+			TIM1->CCR2 = 65535 * (count_16_parts*8-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 8) 
+		{
+			TIM1->CCER |= TIM_CCER_CC2NE;
+			TIM1->CCER &= ~TIM_CCER_CC2E;
+		}
+		else if((i>count_16_parts*8 - 1)&&(i<count_16_parts*9))
+		{
+			TIM1->CCR2 = 65535 * (i-count_16_parts*8) / count_16_parts;
+		}
+		else if((i>count_16_parts*9 - 1)&&(i<count_16_parts*10))
+		{
+			TIM1->CCR2 = 65535 * (count_16_parts*10-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 10)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC2NE;
+			
+			TIM1->CCER |= TIM_CCER_CC1E;
+			TIM1->CCER &= ~TIM_CCER_CC1NE;
+		}
+		else if((i>count_16_parts*10 - 1)&&(i<count_16_parts*11))
+		{
+			TIM1->CCR1 = 65535 * (i-count_16_parts*10) / count_16_parts;
+		}
+		else if((i>count_16_parts*11 - 1)&&(i<count_16_parts*12))
+		{
+			TIM1->CCR1 = 65535 * (count_16_parts*12-i) / count_16_parts;
+		}
+		else if (i == count_16_parts * 12)
+		{
+			TIM1->CCER |= TIM_CCER_CC1NE;
+			TIM1->CCER &= ~TIM_CCER_CC1E;
+		}
+		else if((i>count_16_parts*12 - 1)&&(i<count_16_parts*13))
+		{	
+			TIM1->CCR1 = 65535 * (i-count_16_parts*12) / count_16_parts;
+		}
+		else if((i>count_16_parts*13 - 1)&&(i<count_16_parts*14))
+		{
+			TIM1->CCR1 = 65535 * (count_16_parts*14-i) / count_16_parts;
+		}
+		//delay
+		for(d=0;d<delay;d++)
+		{
+		}
+	}	
 }
 
 void Clockwise_Two()
 {
-		uint32_t count_16_parts = count/16;
+	uint32_t count_16_parts = count/16;
     TIM1->CCER &= ~TIM_CCER_CC1NP; // polarity on
-		TIM1->CCER |= TIM_CCER_CC1NE | TIM_CCER_CC1E; // channel on
-		for(i=0;i<=count_16_parts*7;i++)
-		{
-			if (restart){
-				TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
-				| TIM_CCER_CC2E | TIM_CCER_CC2NE
-				| TIM_CCER_CC3E | TIM_CCER_CC3NE
-				| TIM_CCER_CC4E);
-				TIM1->CCER &= ~(TIM_CCER_CC1P | TIM_CCER_CC1NP 
-				| TIM_CCER_CC2P | TIM_CCER_CC2NP
-				| TIM_CCER_CC3P | TIM_CCER_CC3NP
-				| TIM_CCER_CC4P);
-				TIM1->CCR1 = 0;
-				TIM1->CCR2 = 0;
-				TIM1->CCR3 = 0;
-				TIM1->CCR4 = 0;
-				restart = 0;
-				break;
-			}
-			else if(i<count_16_parts) 
-			{
-				TIM1->CCR1 = 65535 * i / (count_16_parts);
-			}
-      else if(i == count_16_parts) 
-      {
-        TIM1->CCER &= ~TIM_CCER_CC1NP; // polarity on
-        TIM1->CCER |= TIM_CCER_CC1E; // channel on
-				TIM1->CCER &= ~TIM_CCER_CC1NE; // comp. channel off
-          
-        TIM1->CCER |= TIM_CCER_CC2NP; // polarity off ??
-        TIM1->CCER |= TIM_CCER_CC2NE; // comp. channel on
-				TIM1->CCER &= ~TIM_CCER_CC2E; // channel off
-      }
-			else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
-			{
-				TIM1->CCR1 = 65535 * (count_16_parts*2-i)/(count_16_parts);
-				TIM1->CCR2 = 65535 * (count_16_parts*2-i)/(count_16_parts);
-			}
-      else if(i == count_16_parts*2)
-      {
-        TIM1->CCR1 = 0;
-        TIM1->CCER &= ~TIM_CCER_CC2NP; // polarity on
-        TIM1->CCER |= TIM_CCER_CC2E; // channel on
-      }
-			else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
-			{
-        TIM1->CCR2 = 65535 * (i-count_16_parts*2)/(count_16_parts);
-			}
-      else if(i == count_16_parts*3)
-      {
-				TIM1->CCER &= ~TIM_CCER_CC2NP;
-				TIM1->CCER |= TIM_CCER_CC2E;
-				TIM1->CCER &= ~TIM_CCER_CC2NE;
-				
-				TIM1->CCER |= TIM_CCER_CC3NP;
-				TIM1->CCER |= TIM_CCER_CC3NE;
-				TIM1->CCER &= ~TIM_CCER_CC3E;
-      }
-			else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
-			{ 
-				TIM1->CCR2 = 65535 * (count_16_parts*4-i)/(count_16_parts);
-				TIM1->CCR3 = 65535 * (count_16_parts*4-i)/(count_16_parts);
-			}
-      else if(i == count_16_parts*4)
-      {
-				TIM1->CCR2 = 0;
-				TIM1->CCER &= ~TIM_CCER_CC3NP;
-				TIM1->CCER |= TIM_CCER_CC3E;
-      }
-			else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
-			{
-				TIM1->CCR3 = 65535 * (i-count_16_parts*4)/(count_16_parts);
-			}
-      else if(i == count_16_parts*5)
-      {
-				TIM1->CCER &= ~TIM_CCER_CC3NP;
-				TIM1->CCER |= TIM_CCER_CC3E;
-				TIM1->CCER &= ~TIM_CCER_CC3NE;
-				
-				TIM1->CCER |= TIM_CCER_CC4P;
-				TIM1->CCER |= TIM_CCER_CC4E;
-      }
-			else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
-			{
-				TIM1->CCR3 = 65535 * (count_16_parts*6-i)/(count_16_parts);
-				TIM1->CCR4 = 65535 * (count_16_parts*6-i)/(count_16_parts);
-			}
-      else if(i == count_16_parts*6)
-      {
-				TIM1->CCR3 = 0;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				
-				TIM1->CCER &= ~TIM_CCER_CC1NP;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-				TIM1->CCER &= ~TIM_CCER_CC1E;
-      }
-			else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
-			{
-				TIM1->CCR4 = 65535 * (i-count_16_parts*6)/(count_16_parts);
-				TIM1->CCR1 = 65535 * (i-count_16_parts*6)/(count_16_parts);
-			}
-      else if(i == count_16_parts*7)
-      {
-				TIM1->CCR4 = 65535;
-				
-				TIM1->CCER &= ~TIM_CCER_CC1NP;
-				TIM1->CCER |= TIM_CCER_CC1E;
-				TIM1->CCER |= TIM_CCER_CC1NE;
-      }
-			
-			
-			for(d=0;d<delay;d++)
-			{
-			}
+	TIM1->CCER |= TIM_CCER_CC1NE | TIM_CCER_CC1E; // channel on
+	for(i=0;i<=count_16_parts*7;i++)
+	{
+		if (restart){
+			TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
+			| TIM_CCER_CC2E | TIM_CCER_CC2NE
+			| TIM_CCER_CC3E | TIM_CCER_CC3NE
+			| TIM_CCER_CC4E);
+			TIM1->CCER &= ~(TIM_CCER_CC1P | TIM_CCER_CC1NP 
+			| TIM_CCER_CC2P | TIM_CCER_CC2NP
+			| TIM_CCER_CC3P | TIM_CCER_CC3NP
+			| TIM_CCER_CC4P);
+			TIM1->CCR1 = 0;
+			TIM1->CCR2 = 0;
+			TIM1->CCR3 = 0;
+			TIM1->CCR4 = 0;
+			restart = 0;
+			break;
 		}
+		else if(i<count_16_parts) 
+		{
+			TIM1->CCR1 = 65535 * i / (count_16_parts);
+		}
+		else if(i == count_16_parts) 
+		{
+			TIM1->CCER &= ~TIM_CCER_CC1NP; // polarity on
+			TIM1->CCER |= TIM_CCER_CC1E; // channel on
+			TIM1->CCER &= ~TIM_CCER_CC1NE; // comp. channel off
+		
+			TIM1->CCER |= TIM_CCER_CC2NP; // polarity off ??
+			TIM1->CCER |= TIM_CCER_CC2NE; // comp. channel on
+			TIM1->CCER &= ~TIM_CCER_CC2E; // channel off
+		}
+		else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+		{
+			TIM1->CCR1 = 65535 * (count_16_parts*2-i)/(count_16_parts);
+			TIM1->CCR2 = 65535 * (count_16_parts*2-i)/(count_16_parts);
+		}
+		else if(i == count_16_parts*2)
+		{
+			TIM1->CCR1 = 0;
+			TIM1->CCER &= ~TIM_CCER_CC2NP; // polarity on
+			TIM1->CCER |= TIM_CCER_CC2E; // channel on
+		}
+		else if((i>count_16_parts*2 - 1)&&(i<count_16_parts*3))
+		{
+			TIM1->CCR2 = 65535 * (i-count_16_parts*2)/(count_16_parts);
+		}
+		else if(i == count_16_parts*3)
+		{
+			TIM1->CCER &= ~TIM_CCER_CC2NP;
+			TIM1->CCER |= TIM_CCER_CC2E;
+			TIM1->CCER &= ~TIM_CCER_CC2NE;
+			
+			TIM1->CCER |= TIM_CCER_CC3NP;
+			TIM1->CCER |= TIM_CCER_CC3NE;
+			TIM1->CCER &= ~TIM_CCER_CC3E;
+		}
+		else if((i>count_16_parts*3 - 1)&&(i<count_16_parts*4))
+		{ 
+			TIM1->CCR2 = 65535 * (count_16_parts*4-i)/(count_16_parts);
+			TIM1->CCR3 = 65535 * (count_16_parts*4-i)/(count_16_parts);
+		}
+		else if(i == count_16_parts*4)
+		{
+			TIM1->CCR2 = 0;
+			TIM1->CCER &= ~TIM_CCER_CC3NP;
+			TIM1->CCER |= TIM_CCER_CC3E;
+		}
+		else if((i>count_16_parts*4 - 1)&&(i<count_16_parts*5))
+		{
+			TIM1->CCR3 = 65535 * (i-count_16_parts*4)/(count_16_parts);
+		}
+        else if(i == count_16_parts*5)
+        {
+			TIM1->CCER &= ~TIM_CCER_CC3NP;
+			TIM1->CCER |= TIM_CCER_CC3E;
+			TIM1->CCER &= ~TIM_CCER_CC3NE;
+			
+			TIM1->CCER |= TIM_CCER_CC4P;
+			TIM1->CCER |= TIM_CCER_CC4E;
+        }
+		else if((i>count_16_parts*5 - 1)&&(i<count_16_parts*6))
+		{
+			TIM1->CCR3 = 65535 * (count_16_parts*6-i)/(count_16_parts);
+			TIM1->CCR4 = 65535 * (count_16_parts*6-i)/(count_16_parts);
+		}
+        else if(i == count_16_parts*6)
+        {
+			TIM1->CCR3 = 0;
+			TIM1->CCER |= TIM_CCER_CC1NE;
+			
+			TIM1->CCER &= ~TIM_CCER_CC1NP;
+			TIM1->CCER |= TIM_CCER_CC1NE;
+			TIM1->CCER &= ~TIM_CCER_CC1E;
+        }
+		else if((i>count_16_parts*6 - 1)&&(i<count_16_parts*7))
+		{
+			TIM1->CCR4 = 65535 * (i-count_16_parts*6)/(count_16_parts);
+			TIM1->CCR1 = 65535 * (i-count_16_parts*6)/(count_16_parts);
+		}
+		else if(i == count_16_parts*7)
+		{
+			TIM1->CCR4 = 65535;
+			
+			TIM1->CCER &= ~TIM_CCER_CC1NP;
+			TIM1->CCER |= TIM_CCER_CC1E;
+			TIM1->CCER |= TIM_CCER_CC1NE;
+		}	
+			
+		for(d=0;d<delay;d++)
+		{
+		}
+	}
 }
 
 void Counterclockwise_Two(void)
 {
 	uint32_t count_16_parts = count/16;
+	//on 7, off 7, on 6, off 1, CCR increases
+	TIM1->CCER &= ~TIM_CCER_CC1NE; // disable complimentary channel 1 (1) (in case it's not the first round)
 
-	//зажжён 7, тухнет 7, загорается 6, выключаем 1, CCR увеличивается
-	TIM1->CCER &= ~TIM_CCER_CC1NE; // отключение комплиментарного канала 1 (1) (на случай если это не первый круг)
+	TIM1->CCER |= TIM_CCER_CC4P;   // enable polarity on forward channel 4 (7)
+	TIM1->CCER |= TIM_CCER_CC4E;   // enable direct channel 4 (7)
 
-	TIM1->CCER |= TIM_CCER_CC4P; // включение полярности на прямом канале 4 (7)
-	TIM1->CCER |= TIM_CCER_CC4E; // включение прямого канала 4 (7)
-
-	TIM1->CCER |= TIM_CCER_CC3E; // включение прямого канала 3 (6)
-	TIM1->CCER &= ~TIM_CCER_CC3NE; // отключение комплиментарного канала 3 (5)
+	TIM1->CCER |= TIM_CCER_CC3E; // enable direct channel 3 (6)
+	TIM1->CCER &= ~TIM_CCER_CC3NE; // disable complimentary channel 3 (5)
 	for (i = 0;i <= count_16_parts * 7;i++)
 	{
-		if (restart){
+		if (restart){ //disable all
 			TIM1->CCER &= ~(TIM_CCER_CC1E | TIM_CCER_CC1NE 
 			| TIM_CCER_CC2E | TIM_CCER_CC2NE
 			| TIM_CCER_CC3E | TIM_CCER_CC3NE
@@ -695,79 +694,80 @@ void Counterclockwise_Two(void)
 			TIM1->CCR4 = 65535 * i / (count_16_parts);
 			TIM1->CCR3 = 65535 * i / (count_16_parts);
 		}
-		//ca???i 6, oooiao 6, caai?aaony 5, auee??aai 7, CCR oiaiuoaaony
+		//on 6, off 6, on 5, off 7, CCR decreases
 		else if (i == count_16_parts)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC4E; // ioee??aiea i?yiiai eaiaea 4 (7)
+			TIM1->CCER &= ~TIM_CCER_CC4E;  // disable direct channel 4 (7
 
-			TIM1->CCER &= ~TIM_CCER_CC3NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 3 (5)
-			TIM1->CCER |= TIM_CCER_CC3NE; // aee??aiea eiiieeiaioa?iiai eaiaea 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC3NP; // enable polarity on complementary channel 3 (5)
+			TIM1->CCER |= TIM_CCER_CC3NE;  // enable complimentary channel 3 (5)
 		}
 		else if ((i > count_16_parts - 1) && (i < count_16_parts * 2))
 		{
 			TIM1->CCR3 = 65535 * (count_16_parts * 2 - i) / (count_16_parts);
 		}
-		//ca???i 5, oooiao 5, caai?aaony 4, auee??aai 6, CCR oaaee?eaaaony
+		
+		//on 5, off 5, on 4, off 6, CCR increases
 		else if (i == count_16_parts * 2)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC3E; // ioee??aiea i?yiiai eaiaea 3 (6)
+			TIM1->CCER &= ~TIM_CCER_CC3E; // disable direct channel 3 (6)
 
-			TIM1->CCER |= TIM_CCER_CC2E; // aee??aiea i?yiiai eaiaea 2 (4)
-			TIM1->CCER |= TIM_CCER_CC3NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 3 (5)
-			TIM1->CCER &= ~TIM_CCER_CC2NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
+			TIM1->CCER |= TIM_CCER_CC2E;  // enable direct channel 2 (4)
+			TIM1->CCER |= TIM_CCER_CC3NP; // disable polarity on complementary channel 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC2NE;// disable complimentary channel 2 (3)
 		}
 		else if ((i > count_16_parts * 2 - 1) && (i < count_16_parts * 3))
 		{
 			TIM1->CCR3 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
 			TIM1->CCR2 = 65535 * (i - count_16_parts * 2) / (count_16_parts);
 		}
-		//ca???i 4, oooiao 4, caai?aaony 3, auee??aai 5, CCR oiaiuoaaony
+		//on 4, off 4, on 3, off 5, CCR decreases
 		else if (i == count_16_parts * 3)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC3NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 3 (5)
+			TIM1->CCER &= ~TIM_CCER_CC3NE; // disable complimentary channel 3 (5)
 
-			TIM1->CCER &= ~TIM_CCER_CC2NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 2 (3)
-			TIM1->CCER |= TIM_CCER_CC2NE; // aee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC2NP; // enable polarity on complementary channel 2 (3)
+			TIM1->CCER |= TIM_CCER_CC2NE;  // enable complimentary channel 2 (3)
 		}
 		else if ((i > count_16_parts * 3 - 1) && (i < count_16_parts * 4))
 		{
 			TIM1->CCR2 = 65535 * (count_16_parts * 4 - i) / (count_16_parts);
 		}
-		//ca???i 3, oooiao 3, caai?aaony 2, auee??aai 4, CCR oaaee?eaaaony
+		//on 3, off 3, on 2, off 4, CCR increases
 		else if (i == count_16_parts * 4)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC2E; // ioee??aiea i?yiiai eaiaea 2 (4)
+			TIM1->CCER &= ~TIM_CCER_CC2E;  // disable direct channel 2 (4)
 
-			TIM1->CCER |= TIM_CCER_CC1E; // aee??aiea i?yiiai eaiaea 1 (2)
-			TIM1->CCER |= TIM_CCER_CC2NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 2 (3)
-			TIM1->CCER &= ~TIM_CCER_CC1NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1E;   // enable direct channel 1 (2)
+			TIM1->CCER |= TIM_CCER_CC2NP;  // disable polarity on complementary channel 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC1NE; // disable complimentary channel 1 (1)
 		}
 		else if ((i > count_16_parts * 4 - 1) && (i < count_16_parts * 5))
 		{
 			TIM1->CCR2 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
 			TIM1->CCR1 = 65535 * (i - count_16_parts * 4) / (count_16_parts);
 		}
-		//ca???i 2, oooiao 2, caai?aaony 1, auee??aai 3, CCR oiaiuoaaony
+		//on 2, off 2, on 1, off 3, CCR decreases
 		else if (i == count_16_parts * 5)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC2NE; // ioee??aiea eiiieeiaioa?iiai eaiaea 2 (3)
+			TIM1->CCER &= ~TIM_CCER_CC2NE; // disable complimentary channel 2 (3)
 
-			TIM1->CCER &= ~TIM_CCER_CC1NP; // aee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 1 (1)
-			TIM1->CCER |= TIM_CCER_CC1NE; // aee??aiea eiiieeiaioa?iiai eaiaea 1 (1)
+			TIM1->CCER &= ~TIM_CCER_CC1NP; // enable polarity on complementary channel 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1NE;  // enable complimentary channel 1 (1)
 		}
 		else if ((i > count_16_parts * 5 - 1) && (i < count_16_parts * 6))
 		{
 			TIM1->CCR1 = 65535 * (count_16_parts * 6 - i) / (count_16_parts);
 		}
-		//ca???i 1, oooiao 1, caai?aaony 7, auee??aai 2, CCR oaaee?eaaaony
+		//on 1, off 1, on 7, off 2, CCR increases
 		else if (i == count_16_parts * 6)
 		{
-			TIM1->CCER &= ~TIM_CCER_CC1E; // ioee??aiea i?yiiai eaiaea 1 (2)
+			TIM1->CCER &= ~TIM_CCER_CC1E; // disable direct channel 1 (2)
 
-			TIM1->CCER |= TIM_CCER_CC1NP; // ioee??aiea iiey?iinoe ia eiiieeiaioa?iii eaiaea 1 (1)
+			TIM1->CCER |= TIM_CCER_CC1NP; // disable polarity on complementary channel 1 (1)
 			
-			TIM1->CCER &= ~TIM_CCER_CC4P; // ioee??aiea iiey?iinoe ia i?yiii eaiaea 4 (7) (ia neo?ae anee yoi ia ia?aue e?oa)
-			TIM1->CCER |= TIM_CCER_CC4E; // aee??aiea i?yiiai eaiaea 4 (7)
+			TIM1->CCER &= ~TIM_CCER_CC4P; // disable polarity on forward channel 4 (7) (in case it's not the first circle)
+			TIM1->CCER |= TIM_CCER_CC4E;  // enable direct channel 4 (7)
 		}
 		else if ((i > count_16_parts * 6 - 1) && (i < count_16_parts * 7))
 		{
