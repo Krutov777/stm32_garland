@@ -21,25 +21,6 @@
 #include "time.h"
 #include "stdio.h"
 
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
 /* Private variables ---------------------------------------------------------*/
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim3;
@@ -62,9 +43,6 @@ _Bool direction_mode = 0;
 uint8_t number_leds_mode = 1;
 uint8_t switch_speeds_mode = 1;
 _Bool restart = 0;
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -76,22 +54,6 @@ void Clockwise_One(void);
 void Counterclockwise_One(void);
 void Clockwise_Two(void);
 void Counterclockwise_Two(void);
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-int SER_PutChar(int c) {
-  ITM_SendChar (c);
-  return (c);
-}
- 
-int fputc(int c, FILE *f) {
-  return (SER_PutChar(c));
-}
-
-/* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
@@ -99,29 +61,16 @@ int fputc(int c, FILE *f) {
   */
 int main(void)
 {
-  /* USER CODE BEGIN 1 */
-	//uint32_t i, d; // d-aey caaa??ee
-  /* USER CODE END 1 */
-
-  /* MCU Configuration--------------------------------------------------------*/
-
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
-  /* USER CODE BEGIN Init */
-
-  /* USER CODE END Init */
 
   /* Configure the system clock */
   SystemClock_Config();
 
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_TIM1_Init();
+	
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start (&htim1, TIM_CHANNEL_1);   // start shim on cannel 1(ch1)
   HAL_TIMEx_PWMN_Start (&htim1, TIM_CHANNEL_1);// start shim on complimentary channel 1(ch1n)
@@ -141,12 +90,12 @@ int main(void)
   
   TIM1->CCER &= ~TIM_CCER_CC2NE; // clear bits in ch2n and ch3n that is disable this channels
   TIM1->CCER &= ~TIM_CCER_CC3NE;
-  /* USER CODE END 2 */
-  /* Infinite loop */
+	/* USER CODE END 2 */
+  
+	/* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
 		if(number_leds_mode == 1) {
 			switch_speeds_one_led(switch_speeds_mode);
@@ -172,6 +121,7 @@ int main(void)
 		}
   }
   /* USER CODE END 3 */
+	/* USER CODE END WHILE */
 }
 
 // handler for k0 button with external interrupt - speed mode
@@ -222,11 +172,7 @@ void EXTI1_IRQHandler(void)
 		restart = 1;
 		time_key1_press = HAL_GetTick();
 	}
-  /* USER CODE END EXTI1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_1);
-
-  /* USER CODE BEGIN EXTI1_IRQn 1 */
-  /* USER CODE END EXTI1_IRQn 1 */
 }
 
 /**
@@ -235,8 +181,7 @@ void EXTI1_IRQHandler(void)
 // handler for k2 button with external interrupt - number leds mode
 void EXTI2_TSC_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI2_TSC_IRQn 0 */
-  	// chatter protection with 100ms time
+  // chatter protection with 100ms time
 	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
 	{
 		flag_key1_press = 1;
@@ -251,10 +196,7 @@ void EXTI2_TSC_IRQHandler(void)
 		restart = 1; // flag for reset mode
 		time_key1_press = HAL_GetTick();
 	}
-  /* USER CODE END EXTI2_TSC_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_2);
-  /* USER CODE BEGIN EXTI2_TSC_IRQn 1 */
-  /* USER CODE END EXTI2_TSC_IRQn 1 */
 }
 
 
@@ -838,18 +780,11 @@ void SystemClock_Config(void)
 static void MX_TIM1_Init(void)
 {
 
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
-
   TIM_ClockConfigTypeDef sClockSourceConfig = {0};
   TIM_MasterConfigTypeDef sMasterConfig = {0};
   TIM_OC_InitTypeDef sConfigOC = {0};
   TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -915,27 +850,10 @@ static void MX_TIM1_Init(void)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN TIM1_Init 2 */
 
-  /* USER CODE END TIM1_Init 2 */
   HAL_TIM_MspPostInit(&htim1);
 
 }
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
-
-/**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
-
 
 /**
   * @brief GPIO Initialization Function
@@ -981,10 +899,6 @@ static void MX_GPIO_Init(void)
   HAL_NVIC_EnableIRQ(EXTI2_TSC_IRQn);
 
 }
-
-/* USER CODE BEGIN 4 */
-
-/* USER CODE END 4 */
 
 /**
   * @brief  This function is executed in case of error occurrence.
