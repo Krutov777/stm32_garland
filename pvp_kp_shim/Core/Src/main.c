@@ -100,7 +100,6 @@ int main(void)
   
   TIM1->CCER &= ~TIM_CCER_CC2NE; // clear bits in ch2n and ch3n that is disable this channels
   TIM1->CCER &= ~TIM_CCER_CC3NE;
-	/* USER CODE END 2 */
   
 	/* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -113,7 +112,7 @@ int main(void)
 				Clockwise_One();
 				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if(direction_mode == 1) {
+			else {
 				Counterclockwise_One();
 				printf("time = %i\n", HAL_GetTick()*2);
 			}
@@ -124,20 +123,18 @@ int main(void)
 				Clockwise_Two();
 				printf("time = %i\n", HAL_GetTick()*2);
 			}
-			else if(direction_mode == 1) {
+			else {
 				Counterclockwise_Two();
 				printf("time = %i\n", HAL_GetTick()*2);
 			}
 		}
   }
-  /* USER CODE END 3 */
-	/* USER CODE END WHILE */
+ 	/* USER CODE END WHILE */
 }
 
 // handler for k0 button with external interrupt - speed mode
 void EXTI0_IRQHandler(void)
 {
-  /* USER CODE BEGIN EXTI0_IRQn 0 */
 	// chatter protection with 100ms time
 	if(!flag_key1_press && (HAL_GetTick() - time_key1_press) > 100)
 	{
@@ -147,7 +144,7 @@ void EXTI0_IRQHandler(void)
 	{
 		flag_key1_press = 0;
 		// click action
-		if(switch_speeds_mode == 1 || switch_speeds_mode == 2 || switch_speeds_mode == 3)
+		if(switch_speeds_mode <= 3)
 			++switch_speeds_mode;
 		else
 			switch_speeds_mode = 1;
@@ -155,10 +152,7 @@ void EXTI0_IRQHandler(void)
 		restart = 1;
 		time_key1_press = HAL_GetTick();
 	}
-  /* USER CODE END EXTI0_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
-  /* USER CODE BEGIN EXTI0_IRQn 1 */
-  /* USER CODE END EXTI0_IRQn 1 */
 }
 
 /**
@@ -280,7 +274,7 @@ void Clockwise_One(void)
 		{
 			TIM1->CCR1 = 65535 * i / (count_16_parts);
 		}
-		else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+		else if((i>count_16_parts - 1)&&(i<count_16_parts*2)) 
 		{
 			TIM1->CCR1 = 65535 * (count_16_parts*2-i) / count_16_parts;
 		}
@@ -529,7 +523,7 @@ void Clockwise_Two()
 			TIM1->CCER |= TIM_CCER_CC2NE; // comp. channel on
 			TIM1->CCER &= ~TIM_CCER_CC2E; // channel off
 		}
-		else if((i>count_16_parts   - 1)&&(i<count_16_parts*2)) 
+		else if((i>count_16_parts - 1)&&(i<count_16_parts*2)) 
 		{
 			TIM1->CCR1 = 65535 * (count_16_parts*2-i)/(count_16_parts);
 			TIM1->CCR2 = 65535 * (count_16_parts*2-i)/(count_16_parts);
