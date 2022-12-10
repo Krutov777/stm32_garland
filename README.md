@@ -1,7 +1,8 @@
 ## EN:    
 
+### [Documention on EN](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_en.pdf)
 ### Use case diagramm:    
-![use case diagramm](https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm_EN.jpg)    
+<img src="https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm_EN.jpg" data-canonical-src="https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm_EN.jpg" width="361" height="492" /> 
         
 Within the framework of the garland model being developed, the following performers (actors) are distinguished:
 – User;
@@ -20,8 +21,9 @@ A PWM signal is used for smooth ignition and attenuation
 
 ## RU:    
 
+### [Документация на русском](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_ru.pdf)
 ### Диаграмма вариантов использования:   
-![use case diagramm](https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm.png)    
+![use case diagramm](https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm.jpg)    
         
 В рамках разрабатываемой модели гирлянды выделяются следующие исполнители (актеры): 
 	– Пользователь; 
