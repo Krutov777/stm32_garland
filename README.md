@@ -1,7 +1,11 @@
-## EN:    
+![](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_ru.pdf)
+
+## EN:
 
 ### [Documention on EN](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_en.pdf)
-### Use case diagramm:    
+
+### Use case diagramm:
+
 <img src="https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm_EN.jpg" data-canonical-src="https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm_EN.jpg" width="361" height="492" /> 
         
 Within the framework of the garland model being developed, the following performers (actors) are distinguished:
@@ -19,23 +23,25 @@ Restrictions:
 Pressing multiple buttons will be ignored
 A PWM signal is used for smooth ignition and attenuation
 
-## RU:    
+## RU:
 
 ### [Документация на русском](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_ru.pdf)
-### Диаграмма вариантов использования:   
-![use case diagramm](https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm.jpg)    
-        
-В рамках разрабатываемой модели гирлянды выделяются следующие исполнители (актеры): 
-	– Пользователь; 
-	– Светодиоды; 	
-	– Микроконтроллер (как управляющее устройство).
-            
-Основные функции гирлянды: 
+
+### Диаграмма вариантов использования:
+
+![use case diagramm](https://raw.githubusercontent.com/Krutov777/stm32_garland/main/use_case_diagramm.jpg)
+
+В рамках разрабатываемой модели гирлянды выделяются следующие исполнители (актеры):
+– Пользователь;
+– Светодиоды;
+– Микроконтроллер (как управляющее устройство).
+
+Основные функции гирлянды:
 По гирлянде движется светодиод(два светодиода) в одну или другую сторону.
-У гирлянды есть 3 кнопки для изменения режима работы:   
-	1)Изменение скорости движения светодиодов (4 скорости – заж. И пот. 1с, 0.5, 0.25, 0.04)    
-	2)Изменение направления движения (по часовой стрелки и против)    
-	3)Изменение режима (1 или 2 огня)   
+У гирлянды есть 3 кнопки для изменения режима работы:  
+ 1)Изменение скорости движения светодиодов (4 скорости – заж. И пот. 1с, 0.5, 0.25, 0.04)  
+ 2)Изменение направления движения (по часовой стрелки и против)  
+ 3)Изменение режима (1 или 2 огня)  
 Ограничения:
-Нажатия нескольких кнопок будет игнорироваться    
-Для плавного зажигания и затухания используется ШИМ сигнал 
+Нажатия нескольких кнопок будет игнорироваться  
+Для плавного зажигания и затухания используется ШИМ сигнал
