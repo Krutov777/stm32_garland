@@ -1,4 +1,5 @@
-![](https://github.com/Krutov777/stm32_garland/blob/main/PVPKR_4936_ru.pdf)
+# stm32f303vct6 garland
+![](https://github.com/Krutov777/stm32_garland/blob/main/test_cases.gif)
 
 ## EN:
 
